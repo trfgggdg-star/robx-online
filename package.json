@@ -1,0 +1,8 @@
+{
+  "name": "robx-online",
+  "version": "1.0.0",
+  "description": "ROBX game server (accounts, friends, rooms, chat) - zero dependencies",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}
