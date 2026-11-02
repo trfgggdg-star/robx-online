@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ROBX</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+:root{--bg:#10131c;--pn:#1a1f2e;--p2:#262d43;--ink:#eef1f8;--mu:#9aa3ba;--ac:#3ddc97;--a2:#ffb703;--rd:#ff6b6b;color-scheme:dark}
+@media(prefers-color-scheme:light){:root:not([data-theme=dark]){--bg:#eef1f8;--pn:#fff;--p2:#e3e8f3;--ink:#141a2b;--mu:#5b647c;--ac:#0a9b62;--a2:#c47f00;--rd:#c0392b;color-scheme:light}}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Thai","Sarabun",system-ui,sans-serif;overflow:hidden}
+#c{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
+.scr{position:fixed;inset:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);display:flex;flex-direction:column}
+.opq{background:var(--bg)}
+button{font:inherit;background:var(--ac);color:#07130d;border:0;border-radius:10px;padding:9px 12px;font-weight:700;cursor:pointer}
+button.al{background:var(--p2);color:var(--ink)}button.dng{background:var(--rd);color:#fff}
+button:focus-visible,input:focus-visible{outline:3px solid var(--a2);outline-offset:2px}
+.in,input[type=number],input[type=text],input[type=password]{background:var(--bg);color:var(--ink);border:1px solid var(--mu);border-radius:8px;padding:9px;font:inherit;box-sizing:border-box}
+.in{width:100%;margin-bottom:8px}
+.logo{font-weight:800;font-size:24px;letter-spacing:.5px}.logo b{color:var(--ac)}
+/* auth */
+#auth{align-items:center;justify-content:center;padding:16px}
+.card{background:var(--pn);border-radius:18px;padding:20px;width:min(380px,100%)}
+.tabs{display:flex;gap:6px;margin:12px 0}.tabs button{flex:1;background:var(--p2);color:var(--ink)}.tabs button.on{background:var(--ac);color:#07130d}
+.gen{display:flex;gap:8px;margin-bottom:10px}.gen label{flex:1;background:var(--p2);border-radius:10px;padding:10px;text-align:center}
+.msg{color:var(--rd);min-height:20px;font-size:13px;margin:4px 0}
+/* app */
+.top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+#view{flex:1;overflow:auto;padding:0 16px 16px}
+.nav{display:flex;background:var(--pn)}.nav button{flex:1;background:none;color:var(--mu);border-radius:0;font-size:12px;padding:10px 2px}.nav button.on{color:var(--ac)}
+.stab{display:flex;border-bottom:1px solid var(--p2);margin-bottom:12px}.stab button{flex:1;background:none;color:var(--mu);border-radius:0}.stab button.on{color:var(--ink);border-bottom:2px solid var(--ac)}
+h2{font-size:18px;margin:16px 0 8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gc{cursor:pointer}.gc .th{aspect-ratio:16/10;border-radius:12px;margin-bottom:6px}.gc b{display:block;font-size:14px}.gc small{color:var(--mu)}
+.fr{display:flex;gap:12px;overflow:auto}.av{width:72px;height:72px;border-radius:50%;background:var(--p2);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;flex:none}
+.mu{color:var(--mu);font-size:14px;line-height:1.5}
+.empty{text-align:center;padding:40px 10px}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;background:var(--pn);padding:10px;border-radius:12px;margin-bottom:8px}
+/* studio */
+#st{pointer-events:none}#st>*{pointer-events:auto}
+.bar{display:flex;gap:6px;padding:8px;background:var(--pn);overflow:auto}.bar button{padding:8px 10px;flex:none}
+#sh{margin-top:auto;background:var(--pn);height:40%;display:flex;flex-direction:column;border-radius:16px 16px 0 0}
+#shb{flex:1;overflow:auto;padding:10px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+.r3{display:flex;gap:6px;align-items:center;margin-bottom:6px;font-size:13px}.r3 span{width:64px;flex:none}.r3 input[type=number]{width:0;flex:1;padding:6px}.r3 input[type=range]{flex:1}
+.ex{padding:9px;border-radius:8px;background:var(--p2);margin-bottom:5px}.ex.on{outline:2px solid var(--a2)}
+/* play */
+#pl button#ex{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:10px}
+#stick{position:absolute;left:24px;bottom:calc(28px + env(safe-area-inset-bottom,0px));width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.14);display:none;touch-action:none}
+#kn{position:absolute;left:40px;top:40px;width:40px;height:40px;border-radius:50%;background:var(--ac)}
+#jp{position:absolute;right:28px;bottom:calc(40px + env(safe-area-inset-bottom,0px));width:80px;height:80px;border-radius:50%;display:none}
+.touch #stick,.touch #jp{display:block}
+#pl{pointer-events:none}#pl>*{pointer-events:auto}
+#chat{position:absolute;left:10px;top:calc(10px + env(safe-area-inset-top,0px));width:min(260px,60%);background:rgba(10,12,20,.6);color:#fff;border-radius:12px;padding:8px;font-size:13px}#chat input{flex:1;min-width:0;padding:6px}#chat button{padding:6px 10px}#cl div{word-break:break-word}#avs{pointer-events:none}#avs>*{pointer-events:auto}#asheet{margin-top:auto;height:56%;background:var(--pn);border-radius:16px 16px 0 0;padding:10px;display:flex;flex-direction:column;box-sizing:border-box}.ig{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:1;overflow:auto;align-content:start}.ic{background:var(--p2);border-radius:12px;padding:6px;font-size:12px;text-align:center;cursor:pointer}.ic.on{outline:2px solid var(--a2)}.ic b{display:block;margin:2px 0}.ib{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:30px}.seg{display:flex;gap:6px;margin-bottom:6px}.seg button{flex:1}.act{display:flex;gap:8px;align-items:center;justify-content:space-between;padding-top:8px;font-size:14px}#em{position:absolute;top:calc(56px + env(safe-area-inset-top,0px));right:10px}#hud{position:absolute;bottom:calc(150px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:rgba(10,12,20,.65);color:#fff;padding:6px 12px;border-radius:12px;font-weight:700;pointer-events:none}#hud:empty{display:none}#po{position:absolute;right:10px;top:calc(100px + env(safe-area-inset-top,0px));max-width:55%;font:12px monospace;background:rgba(0,0,0,.65);color:#9fffbf;padding:6px;border-radius:8px;white-space:pre-wrap}.cover{aspect-ratio:16/10;border-radius:12px;margin-top:12px}.gbar{display:flex;gap:8px;padding:10px 12px;background:var(--pn);position:relative}.pop{position:absolute;bottom:62px;background:var(--pn);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;box-shadow:0 4px 20px rgba(0,0,0,.4)}.bdg{position:absolute;top:-4px;right:2px;background:#3b6bff;color:#fff;border-radius:10px;font-size:12px;padding:1px 6px}.dot{position:absolute;right:4px;top:52px;width:14px;height:14px;background:var(--ac);border-radius:50%;border:2px solid var(--bg)}.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.sc{background:var(--pn);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px}.sav{display:grid;grid-template-columns:1fr 1fr;gap:6px}.sav i{aspect-ratio:1;border-radius:50%;background:var(--p2);display:flex;align-items:center;justify-content:center;font-style:normal;font-weight:700}.pb{height:6px;background:var(--p2);border-radius:3px}.pb i{display:block;height:100%;background:var(--mu);border-radius:3px}#ex{display:none!important}#tb{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));left:10px;display:flex;gap:8px;align-items:center;z-index:3}#lg{width:46px;height:46px;border-radius:50%;background:#111;color:#fff;font-size:22px;padding:0}#pill{display:flex;background:#111;border-radius:24px;padding:2px 6px}#pill button{background:none;color:#fff;font-size:20px;padding:10px 12px}#qm{position:absolute;top:calc(64px + env(safe-area-inset-top,0px));left:64px;background:#111;border-radius:12px;padding:6px;display:flex;flex-direction:column;gap:4px;z-index:3}#qm button{background:#2a2d33;color:#fff;text-align:left}#stt{position:absolute;bottom:calc(8px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);color:#9fffbf;font:12px monospace;padding:4px 8px;border-radius:8px;pointer-events:none}#chat{top:calc(64px + env(safe-area-inset-top,0px))!important;left:10px}#em{top:calc(10px + env(safe-area-inset-top,0px))!important}#pm{position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;justify-content:center;align-items:flex-start;padding-top:calc(66px + env(safe-area-inset-top,0px));z-index:4}.pmp{background:rgba(18,19,22,.97);color:#fff;border-radius:14px;width:min(900px,96%);max-height:calc(100vh - 90px);overflow:auto}.pmt{display:flex;border-bottom:1px solid #333;position:sticky;top:0;background:#121316}.pmt button{flex:1;background:none;color:#9aa3ba;border-radius:0;padding:14px 4px;font-size:13px}.pmt button.on{color:#fff;border-bottom:2px solid #fff}.pmc{padding:14px}.pmc button{background:#2a2d33;color:#fff}.pmc button.pri,.pmc button.on{background:#27348b}.pb3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}.srow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #26282d}.srow select{background:#222;color:#fff;border:1px solid #555;border-radius:8px;padding:8px;max-width:55%}.ctl{display:flex;align-items:center;gap:8px;justify-content:flex-end}.ctl>span{min-width:90px;text-align:center}.bars{display:flex;gap:2px}.bars i{width:16px;height:22px;background:#444;border-radius:3px}.bars i.f{background:#ddd}.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}.plist{display:flex;flex-direction:column;gap:6px}.pt{background:#1d1f24;border-radius:10px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative;text-align:center}.pa{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff}.pt>button[data-pk]{position:absolute;top:4px;right:4px;padding:2px 8px}.pact{display:flex;flex-direction:column;gap:4px;width:100%}.hg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.hc{background:#1d1f24;border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:4px;font-size:13px}.hc span{color:#9aa3ba}#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:20px;font-size:14px;max-width:86%;text-align:center;z-index:9}
+</style></head><body>
+<canvas id="c" hidden></canvas>
+
+<div id="auth" class="scr opq">
+ <div class="card">
+  <div class="logo">ROB<b>X</b></div>
+  <div class="tabs"><button id="tL" class="on">เข้าสู่ระบบ</button><button id="tR">ลงทะเบียน</button></div>
+  <input class="in" id="un" type="text" placeholder="ชื่อผู้ใช้" maxlength="16" autocomplete="username">
+  <input class="in" id="pw" type="password" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัว)" autocomplete="current-password">
+  <div class="gen" id="gen" hidden><label><input type="radio" name="g" value="m"> ชาย</label><label><input type="radio" name="g" value="f"> หญิง</label></div>
+  <div class="msg" id="msg" role="alert"></div>
+  <button id="go" style="width:100%">ยืนยัน</button>
+  <p class="mu" id="onl" style="font-size:12px"></p>
+ </div>
+</div>
+
+<div id="app" class="scr opq" hidden>
+ <div class="top"><div class="logo">ROB<b>X</b></div><div><button class="al" id="bs" aria-label="ค้นหา">ค้นหา</button> <button class="al" id="bb" aria-label="แจ้งเตือน">แจ้งเตือน</button></div></div>
+ <div id="view"></div>
+ <div class="nav" id="nav"><button data-t="h">⌂<br>หน้าหลัก</button><button data-t="m">◈<br>โมเมนต์</button><button data-t="c">✚<br>สร้าง</button><button data-t="x">✉<br>แชท</button><button data-t="u">☺<br>ฉัน</button></div>
+</div>
+
+<div id="gd" class="scr opq" hidden></div>
+<div id="sv" class="scr opq" hidden><div class="top"><button class="al" id="svx" aria-label="ปิด">✕</button><b>เข้าร่วมกับเพื่อนๆ</b><span></span></div><div id="sl" style="flex:1;overflow:auto;padding:0 16px 16px"></div></div>
+<div id="fr" class="scr opq" hidden><div class="top"><button class="al" id="fx" aria-label="ปิด">✕</button><b>เพื่อน</b><span></span></div><div style="padding:0 16px"><input class="in" id="fq" type="text" placeholder="พิมพ์ชื่อเพื่อน" maxlength="16"></div><div id="fl" style="flex:1;overflow:auto;padding:0 16px 16px"></div></div>
+<div id="st" class="scr" hidden>
+ <div class="bar"><button class="al" id="sx" aria-label="ปิด">ปิด</button><button class="al" id="su" aria-label="ย้อนกลับ">↶</button><button class="al" id="sr" aria-label="ทำซ้ำ">↷</button><button id="ss">บันทึก</button><button id="sp">เล่น</button><button class="al" id="sb">เผยแพร่</button></div>
+ <div id="sh"><div class="bar" style="border-radius:16px 16px 0 0"><button class="al" data-s="a">เพิ่ม</button><button class="al" data-s="e">Explorer</button><button class="al" data-s="p">คุณสมบัติ</button><button class="al" data-s="s">สคริปต์</button><button class="al" id="zi" aria-label="ซูมเข้า">＋</button><button class="al" id="zo" aria-label="ซูมออก">－</button></div><div id="shb"></div></div>
+</div>
+
+<div id="avs" class="scr" hidden><div class="bar"><button class="al" id="ax2">กลับ</button><b id="ac" style="margin-left:auto;padding:8px"></b><button id="ad">รับเหรียญรายวัน</button></div><div id="asheet"></div></div>
+<div id="pl" class="scr" hidden><div id="tb"><button id="lg" aria-label="เมนู"><b>X</b></button><div id="pill"><button id="hb" aria-label="เมนูลัด">☰</button><button id="ch" aria-label="แชต">💬</button><button id="mc" aria-label="แชทเสียง">🔇</button></div></div><div id="qm" hidden><button data-q="emote">ท่าทาง</button><button data-q="shot">ถ่ายภาพหน้าจอ</button><button data-q="set">ตั้งค่า</button></div><div id="stt" hidden></div><div id="pm" hidden></div><button id="ex" class="dng">ออก</button><button id="em" class="al">ท่าทาง (E)</button><div id="hud"></div><div id="po" hidden></div><div id="chat" hidden><div id="oc"></div><div id="cl"></div><div style="display:flex;gap:4px"><input id="ci" type="text" maxlength="120" placeholder="พิมพ์แชต"><button id="cs">ส่ง</button></div></div><div id="stick"><div id="kn"></div></div><button id="jp" aria-label="กระโดด">กระโดด</button></div>
+<div id="toast" hidden></div>
+
+<script>
+/* ROBX network adapter: ทำให้แอปคุยกับ server.js ผ่าน WebSocket
+   ถ้าทำ APK แบบ Capacitor ให้ใส่ URL เซิร์ฟเวอร์ที่นี่ เช่น "wss://robx-xxxx.onrender.com"
+   ถ้าเปิดเว็บจากเซิร์ฟเวอร์เดียวกัน (หรือทำ APK แบบ TWA/WebView ชี้มาที่เว็บ) ปล่อยว่างได้ */
+window.ROBX_SERVER_URL = window.ROBX_SERVER_URL || "";
+(function(){
+ var URLW=window.ROBX_SERVER_URL||(location.protocol.indexOf("http")==0?location.origin.replace(/^http/,"ws"):"");
+ var ws=null,openP=null,seq=0,pend={},snaps={},room=null,token=null,me=null,closing=false;
+ function onMsg(e){var m;try{m=JSON.parse(e.data)}catch(x){return}
+  if(m.i&&pend[m.i]){var p=pend[m.i];delete pend[m.i];clearTimeout(p.t);m.ok?p.res(m.d):p.rej(new Error(m.e||"ผิดพลาด"));return}
+  if(m.ev=="snap"&&snaps[m.c])snaps[m.c](mk(m.docs));
+  else if(m.ev=="peers"&&room&&room.pc)room.pc({peers:m.peers});
+  else if(m.ev=="msg"&&room&&room.tc[m.t])room.tc[m.t]({data:m.d})}
+ function mk(docs){return{docs:docs.map(function(d){return{id:d.id,data:function(){return d.data}}})}}
+ function open(){if(openP)return openP;openP=new Promise(function(res,rej){if(!URLW){openP=null;return rej(new Error("ยังไม่ได้ตั้งค่า ROBX_SERVER_URL"))}
+  var s=new WebSocket(URLW);s.onopen=function(){ws=s;res()};s.onerror=function(){};s.onmessage=onMsg;
+  s.onclose=function(){var was=ws===s;ws=null;openP=null;for(var k in pend){clearTimeout(pend[k].t);pend[k].rej(new Error("การเชื่อมต่อขาด"));delete pend[k]}if(!was)rej(new Error("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้"));if(token&&!closing)setTimeout(reconnect,1500)}});return openP}
+ function call(m){return open().then(function(){return new Promise(function(res,rej){var i=++seq;m.i=i;pend[i]={res:res,rej:rej,t:setTimeout(function(){delete pend[i];rej(new Error("เซิร์ฟเวอร์ไม่ตอบ"))},15000)};ws.send(JSON.stringify(m))})})}
+ function reconnect(){if(!token)return;call({op:"resume",token:token}).then(function(){Object.keys(snaps).forEach(function(c){call({op:"sub",c:c}).then(function(r){snaps[c](mk(r.docs))}).catch(function(){})});if(room)call({op:"join",r:room.name}).catch(function(){})}).catch(function(){setTimeout(reconnect,3000)})}
+ var N={url:URLW,uid:null,admin:false,api:{}};
+ N.auth=function(op,name,pw,gender){return call({op:op,name:name,pw:pw,gender:gender}).then(function(r){token=r.token;N.uid=r.uid;N.admin=r.admin;try{localStorage.setItem("robx_tk",token)}catch(e){}return r})};
+ N.resume=function(){try{token=localStorage.getItem("robx_tk")}catch(e){}if(!token||!URLW)return Promise.resolve(null);return call({op:"resume",token:token}).then(function(r){N.uid=r.uid;N.admin=r.admin;return r}).catch(function(e){if(/เซสชัน/.test(e.message)){token=null;try{localStorage.removeItem("robx_tk")}catch(x){}}return null})};
+ N.logout=function(){closing=true;try{call({op:"logout",token:token})}catch(e){}try{localStorage.removeItem("robx_tk")}catch(e){}};
+ N.api.db={doc:function(p){return{get:function(){return call({op:"get",p:p}).then(function(r){return{exists:r.exists,data:function(){return r.data}}})},set:function(v){return call({op:"set",p:p,v:v})},delete:function(){return call({op:"del",p:p})}}},
+  collection:function(c){return{onSnapshot:function(cb,eb){snaps[c]=cb;call({op:"sub",c:c}).then(function(r){cb(mk(r.docs))}).catch(function(e){if(eb)eb(e)})}}}};
+ N.api.user={id:function(){return Promise.resolve(N.uid)},isOwner:function(){return Promise.resolve(N.admin)},canEdit:function(){return Promise.resolve(N.admin)}};
+ N.api.room={join:function(name){return call({op:"join",r:name}).then(function(){var r={name:name,pc:null,tc:{}};room=r;
+  return{presence:function(v){if(ws&&ws.readyState==1)ws.send(JSON.stringify({op:"presence",v:v}));return Promise.resolve()},emit:function(t,v){return call({op:"emit",t:t,v:v})},onPeers:function(f){r.pc=f},on:function(t,f){r.tc[t]=f},leave:function(){if(room===r)room=null;if(ws&&ws.readyState==1)ws.send(JSON.stringify({op:"leave"}))}}})}};
+ window.ROBX_NET=N;
+})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function J(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function W(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){toast("บันทึกไม่ได้: พื้นที่เบราว์เซอร์เต็มหรือถูกบล็อก")}}
+var tt;function toast(m){var t=$("toast");t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(function(){t.hidden=true},2600)}
+var users=J("robx_users",{}),games=J("robx_games",[]),me=J("robx_session",null);
+if(matchMedia("(pointer:coarse)").matches)document.body.classList.add("touch");
+
+/* ---------- auth ---------- */
+function use(n){return Promise.resolve(window.ROBX_NET?window.ROBX_NET.api[n]:null)}
+function b64(a){return btoa(String.fromCharCode.apply(null,a))}
+function unb64(s){return Uint8Array.from(atob(s),function(c){return c.charCodeAt(0)})}
+async function hash(pw,salt){var k=await crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveBits"]);return b64(new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt:salt,iterations:100000,hash:"SHA-256"},k,256)))}
+var DB=null,RM=null,USR=null,uid=null,prof=null,pubs=null,net=null,amode="login";
+function setM(m){amode=m;$("tL").classList.toggle("on",m=="login");$("tR").classList.toggle("on",m=="reg");$("gen").hidden=m=="login";$("msg").textContent=""}
+$("tL").onclick=function(){setM("login")};$("tR").onclick=function(){setM("reg")};
+function err(m){$("msg").textContent=m}
+function U(){return DB&&uid?prof:users[me]}
+$("go").onclick=async function(){var n=$("un").value.trim(),p=$("pw").value,key=n.toLowerCase();err("");
+ if(n.length<3||n.length>16)return err("ชื่อผู้ใช้ต้องยาว 3–16 ตัวอักษร");
+ if(p.length<6)return err("รหัสผ่านต้องมีอย่างน้อย 6 ตัว");
+ try{
+  if(DB&&uid){
+   if(prof){if(await hash(p,unb64(prof.salt))!==prof.hash)return err("รหัสผ่านไม่ถูกต้อง");enter(uid)}
+   else{var g0=document.querySelector("input[name=g]:checked");if(!g0)return err("กรุณาเลือกเพศ");
+    var sl=crypto.getRandomValues(new Uint8Array(16)),np={name:n,gender:g0.value,salt:b64(sl),hash:await hash(p,sl),joined:Date.now()};
+    await DB.doc("data/users/"+uid+"/profile").set(np);await DB.doc("players/"+uid).set({name:n,gender:g0.value});prof=np;enter(uid)}
+   return}
+  if(amode=="reg"){var g=document.querySelector("input[name=g]:checked");
+   if(users[key])return err("ชื่อนี้ถูกใช้แล้ว");if(!g)return err("กรุณาเลือกเพศ");
+   var salt=crypto.getRandomValues(new Uint8Array(16));
+   users[key]={name:n,gender:g.value,salt:b64(salt),hash:await hash(p,salt),joined:Date.now()};W("robx_users",users);enter(key)}
+  else{var u=users[key];if(!u||await hash(p,unb64(u.salt))!==u.hash)return err("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");enter(key)}
+ }catch(e){err("เกิดข้อผิดพลาด: "+(e&&e.message||"ไม่ทราบสาเหตุ"))}};
+function enter(k){me=k;if(!(DB&&uid))W("robx_session",k);$("pw").value="";$("auth").hidden=true;$("app").hidden=false;tab="h";render();loadWal().then(function(){applyRig();render()});if(DB&&uid)startBeat()}
+async function boot(){$("go").disabled=true;err("กำลังเชื่อมต่อออนไลน์…");
+ var c=await Promise.all([use("db"),use("room"),use("user")]);DB=c[0];RM=c[1];USR=c[2];
+ if(DB&&USR){try{uid=await USR.id();if(!uid)throw 0;try{adm=!!(await USR.isOwner())||!!(await USR.canEdit())}catch(e){}var sn=await DB.doc("data/users/"+uid+"/profile").get();prof=sn.exists?sn.data():null;
+  DB.collection("pub").onSnapshot(function(q2){pubs=q2.docs.map(function(d){var x=d.data();x.id=d.id;return x});if(me&&tab=="h"&&!$("app").hidden)render()},function(){pubs=null});subs()}catch(e){DB=null;uid=null}}
+ else DB=null;
+ $("go").disabled=false;err("");
+ if(DB&&uid){me=null;$("onl").textContent="ออนไลน์: เชื่อมต่อแล้ว — "+(RM?"เล่นหลายคนได้":"ห้องเล่นหลายคนไม่พร้อม");
+  if(prof){setM("login");$("un").value=prof.name;$("un").readOnly=true;$("tR").hidden=true;$("tL").hidden=true}else{setM("reg");$("tL").hidden=true;$("tR").hidden=true}}
+ else{$("onl").textContent="โหมดออฟไลน์: บัญชีและแมพอยู่ในเครื่องนี้ ไม่มีผู้เล่นหลายคน";if(me&&users[me])enter(me);else me=null}}
+/* ---------- app views ---------- */
+var tab="h",q="",rank=false;
+function thumb(g){var c=(g.cols||g.parts.map(function(p){return p.c})).slice(0,3).map(function(x){return/^#[0-9a-f]{6}$/i.test(x)?x:"#4a5a7a"});while(c.length<3)c.push("#4a5a7a");return"linear-gradient(135deg,"+c.join(",")+")"}
+function card(g){return'<div class="gc" data-play="'+esc(g.id)+'" tabindex="0" role="button"><div class="th" style="background:'+thumb(g)+'"></div><b>'+esc(g.title)+'</b><small>โดย '+esc(g.owner)+' • '+(g.plays==null?"หลายผู้เล่น":"เล่น "+g.plays+" ครั้ง")+'</small></div>'}
+function pubAll(){return DB&&uid&&pubs?pubs:games.filter(function(g){return g.published})}
+function pub(){return pubAll().filter(function(g){return!q||(String(g.title)+String(g.owner)).toLowerCase().indexOf(q.toLowerCase())>=0})}
+function playGame(g,room,priv){var list,sc=g.scripts;try{list=typeof g.parts=="string"?JSON.parse(g.parts):g.parts;if(typeof sc=="string")sc=JSON.parse(sc)}catch(e){}
+ if(!Array.isArray(list))return toast("ข้อมูลแมพเสียหาย");
+ if(g.cols&&RM&&uid){if(!room){room=pickRoom(g);priv=0}else if(roomCount(room)>=MAXP)return toast("เซิร์ฟเวอร์เต็ม")}else room=null;
+ curNext={g:gid(g),r:room||"",p:priv?1:0};
+ if(!g.cols){g.plays++;W("robx_games",games)}startPlay(list,"app",room,sc)}
+function render(){var v=$("view"),h="",u=U();
+ [].forEach.call($("nav").children,function(b){b.classList.toggle("on",b.dataset.t==tab)});
+ if(tab=="h"){var l=pub().slice();if(rank)l.sort(function(a,b){return b.plays-a.plays});
+  h='<div class="stab"><button data-r="0" class="'+(rank?"":"on")+'">สำหรับคุณ</button><button data-r="1" class="'+(rank?"on":"")+'">อันดับ</button></div>'+
+  '<div class="fr" style="align-items:center"><div class="av">'+esc(u.name[0].toUpperCase())+'</div><b style="font-size:22px">'+esc(u.name)+'</b></div>'+
+  frRow()+
+  '<h2>'+(q?'ผลการค้นหา "'+esc(q)+'"':'แนะนำสำหรับคุณ')+'</h2>'+(l.length?'<div class="grid">'+l.map(card).join("")+'</div>':'<div class="empty mu">ยังไม่มีเกมในแพลตฟอร์ม<br><br><button data-t="c">ไปสร้างแมพแรก</button></div>');
+  var last=games.filter(function(g){return g.id==u.last&&g.published})[0];if(last)h+='<h2>ดำเนินการต่อ</h2><div class="grid">'+card(last)+'</div>'}
+ else if(tab=="c"){var my=games.filter(function(g){return g.ownerKey==me});
+  h='<h2>สร้างแมพของคุณ</h2><button id="nw" style="width:100%">สร้างแมพใหม่</button><h2>แมพของฉัน</h2>'+(my.length?my.map(function(g){return'<div class="row"><div><b>'+esc(g.title)+'</b><br><small class="mu">'+(g.published?"เผยแพร่แล้ว":"ฉบับร่าง")+' • '+g.parts.length+' วัตถุ</small></div><div><button data-ed="'+g.id+'">แก้ไข</button> <button class="dng" data-dl="'+g.id+'">ลบ</button></div></div>'}).join(""):'<div class="empty mu">ยังไม่มีแมพ กด "สร้างแมพใหม่" เพื่อเปิด ROBX Studio</div>')}
+ else if(tab=="u"){h='<h2>โปรไฟล์</h2><div class="row"><div class="fr" style="align-items:center"><div class="av">'+esc(u.name[0].toUpperCase())+'</div><div><b>'+esc(u.name)+'</b><br><small class="mu">'+(u.gender=="m"?"ชาย":"หญิง")+' • สมัครเมื่อ '+new Date(u.joined).toLocaleDateString("th-TH")+'</small></div></div></div>'+uiU()+'<button class="dng" id="lo" style="width:100%">ออกจากระบบ</button>'}
+ else h='<div class="empty mu"><b>'+(tab=="m"?"โมเมนต์":"แชท")+'</b><br><br>ยังไม่เปิดใช้งาน เพราะต้องมีเซิร์ฟเวอร์จริงสำหรับหลายผู้ใช้</div>';
+ v.innerHTML=h;var nn=DB&&uid?inc().length:0;$("bb").textContent="แจ้งเตือน"+(nn?" ("+nn+")":"")}
+$("nav").onclick=function(e){var b=e.target.closest("button");if(b){tab=b.dataset.t;render()}};
+$("view").onclick=function(e){var t=e.target.closest("[data-t],[data-r],[data-play],[data-ed],[data-dl],[data-fr],#nw,#lo,#bav,#bdl");if(!t)return;
+ if(t.dataset.t){tab=t.dataset.t;render()}
+ else if(t.dataset.r){rank=t.dataset.r=="1";render()}
+ else if(t.dataset.play){var g=pubAll().filter(function(x){return String(x.id)==t.dataset.play})[0];if(g)openGd(g)}
+ else if(t.dataset.ed){openStudio(games.filter(function(x){return x.id==t.dataset.ed})[0])}
+ else if(t.dataset.dl){if(confirm("ลบแมพนี้ถาวร?")){games=games.filter(function(x){return x.id!=t.dataset.dl});W("robx_games",games);render()}}
+ else if(t.dataset.fr)openFr();
+ else if(t.id=="nw"){var g2={id:Date.now().toString(36),title:"แมพใหม่ของ "+U().name,owner:U().name,ownerKey:me,published:false,plays:0,parts:[{id:1,n:"จุดเกิด",t:"spawn",p:[0,0,0],s:[4,1,4],r:0,c:"#ffb703",o:0,k:false}]};games.push(g2);W("robx_games",games);openStudio(g2)}
+ else if(t.id=="bav")openAv();else if(t.id=="bdl")daily();else if(t.id=="lo"){if(window.ROBX_NET){window.ROBX_NET.logout();setTimeout(function(){location.reload()},200);return}me=null;W("robx_session",null);$("app").hidden=true;$("auth").hidden=false}};
+$("bs").onclick=function(){var s=prompt("ค้นหาเกมหรือชื่อผู้สร้าง",q);if(s!==null){q=s.trim();tab="h";render()}};
+$("bb").onclick=function(){var n=DB&&uid?inc().length:0;if(n)openFr();else toast("ไม่มีการแจ้งเตือน")};
+
+/* ---------- 3D core ---------- */
+var cv=$("c"),R=new THREE.WebGLRenderer({canvas:cv,antialias:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;
+var S=new THREE.Scene();S.background=new THREE.Color(0x8fc8ff);S.fog=new THREE.Fog(0x8fc8ff,60,220);
+var cam=new THREE.PerspectiveCamera(65,1,.1,400);
+S.add(new THREE.HemisphereLight(0xffffff,0x556677,.85));
+var sun=new THREE.DirectionalLight(0xffffff,.9);sun.position.set(30,50,20);sun.castShadow=true;var sc=sun.shadow.camera;sc.left=sc.bottom=-60;sc.right=sc.top=60;sun.shadow.mapSize.set(1024,1024);S.add(sun);
+var fl=new THREE.Mesh(new THREE.PlaneGeometry(400,400),new THREE.MeshLambertMaterial({color:0x5fae5f}));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;S.add(fl);
+var gr=new THREE.GridHelper(400,200,0x4a994a,0x4a994a);gr.position.y=.01;S.add(gr);
+var world=new THREE.Group();S.add(world);
+function geo(t){if(t=="sphere")return new THREE.SphereGeometry(.5,20,14);if(t=="cyl")return new THREE.CylinderGeometry(.5,.5,1,20);if(t=="spawn")return new THREE.CylinderGeometry(.5,.5,.1,24);
+ if(t=="wedge"){var s=new THREE.Shape();s.moveTo(-.5,-.5);s.lineTo(.5,-.5);s.lineTo(-.5,.5);var g=new THREE.ExtrudeGeometry(s,{depth:1,bevelEnabled:false});g.translate(0,0,-.5);return g}return new THREE.BoxGeometry(1,1,1)}
+function upd(m,p){m.position.set(p.p[0],p.p[1]+(p.t=="spawn"?.05*p.s[1]:0),p.p[2]);m.scale.set(p.s[0],p.s[1],p.s[2]);m.rotation.y=p.r*Math.PI/180;m.material.color.set(p.c);m.material.opacity=1-p.o;m.material.transparent=p.o>0}
+function rebuild(list){while(world.children.length)world.remove(world.children[0]);list.forEach(function(p){var m=new THREE.Mesh(geo(p.t),new THREE.MeshLambertMaterial());m.castShadow=m.receiveShadow=true;m.userData.id=p.id;upd(m,p);world.add(m)})}
+function meshOf(id){return world.children.filter(function(m){return m.userData.id==id})[0]}
+
+/* ---------- avatar ---------- */
+function mkAv(r15){var g=new THREE.Group(),pt={};
+ function mesh(k,w,h,d,cy){var m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial());m.position.y=cy;m.castShadow=true;pt[k]=m;return m}
+ function grp(k,x,y,par,ch){var q=new THREE.Group();q.position.set(x,y,0);(par||g).add(q);if(ch)q.add(ch);pt[k+"G"]=q;return q}
+ grp("head",0,4.5,0,mesh("head",1,1,1,0));
+ if(!r15){grp("torso",0,4,0,mesh("torso",2,2,1,-1));grp("aL",-1.5,4,0,mesh("aL",1,2,1,-1));grp("aR",1.5,4,0,mesh("aR",1,2,1,-1));grp("lL",-.5,2,0,mesh("lL",1,2,1,-1));grp("lR",.5,2,0,mesh("lR",1,2,1,-1))}
+ else{grp("torso",0,4,0,mesh("torso",2,1.2,1,-.6));grp("torso2",0,2.8,0,mesh("torso2",1.9,.8,1,-.4));
+  [["L",-1],["R",1]].forEach(function(s){var n=s[0],x=s[1],ua=grp("a"+n,x*1.4,4,0,mesh("a"+n,.8,.95,.8,-.475)),la=grp("a"+n+"2",0,-.95,ua,mesh("a"+n+"2",.8,.8,.8,-.4));grp("h"+n,0,-.8,la,mesh("h"+n,.8,.25,.8,-.125));
+   var ul=grp("l"+n,x*.5,2,0,mesh("l"+n,.9,.95,.95,-.475)),ll=grp("l"+n+"2",0,-.95,ul,mesh("l"+n+"2",.9,.8,.9,-.4));grp("f"+n,0,-.8,ll,mesh("f"+n,.9,.25,1.1,-.125))})}
+ grp("hair",0,5.05,0,mesh("hair",1.1,.35,1.1,0));grp("back",0,5,0,mesh("back",1.1,1.6,.3,-.8));pt.backG.position.z=-.5;
+ var tg=document.createElement("canvas");tg.width=256;tg.height=64;var tx=new THREE.CanvasTexture(tg),sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,depthTest:false}));sp.scale.set(5,1.25,1);sp.position.y=6.4;g.add(sp);g.scale.setScalar(.48);
+ var sk=r15?["head","aL","aR","aL2","aR2","hL","hR"]:["head","aL","aR"],sh=r15?["torso","aL","aR","aL2","aR2"]:["torso","aL","aR"],pn=r15?["torso2","lL","lR","lL2","lR2","fL","fR"]:["lL","lR"];
+ return{g:g,pt:pt,tg:tg,tx:tx,sp:sp,r15:!!r15,sk:sk,sh:sh,pn:pn,al:sh.concat(pn)}}
+function dressA(a,f,name,eq){var pt=a.pt,tc=a.tg.getContext("2d");a.sk.forEach(function(k){pt[k].material.color.set("#f1c27d")});pt.torso.material.color.set(f?"#ff6fae":"#3d7bff");a.pn.forEach(function(k){pt[k].material.color.set(f?"#5b4a8a":"#2b2f44")});pt.hair.material.color.set(f?"#6b3a1f":"#4a2f1a");pt.back.material.color.set("#6b3a1f");pt.backG.visible=f;
+ tc.clearRect(0,0,256,64);tc.fillStyle="rgba(0,0,0,.55)";tc.fillRect(0,8,256,48);tc.fillStyle="#fff";tc.font="bold 28px sans-serif";tc.textAlign="center";tc.fillText(name,128,43);a.tx.needsUpdate=true;a.al.forEach(function(k){pt[k].material.map=null});applyEq(a,eq)}
+var A=mkAv(),av=A.g,pt=A.pt;S.add(av);
+function dress(){var u=U();dressA(A,u.gender=="f",u.name,wal.eq)}
+/* ---------- online players ---------- */
+var rem={},nacc=0;
+function clearRemotes(){for(var k in rem)S.remove(rem[k].a.g);rem={};$("oc").textContent="";$("cl").textContent=""}
+function syncPeers(ps){var seen={},n=0;ps.forEach(function(p){n++;if(p.isMe||p.kind!="viewer")return;var q=p.presence;if(typeof q.x!="number"||!isFinite(q.x+q.y+q.z))return;seen[p.peer]=1;var r=rem[p.peer];
+  if(!r){r=rem[p.peer]={a:mkAv(q.rg=="r15")};r.a.g.position.set(q.x,q.y,q.z);S.add(r.a.g);dressA(r.a,q.g=="f",String(q.n||"ผู้เล่น").slice(0,16))}r.t=q;if((q.rg=="r15")!=!!r.a.r15){var og=r.a.g;S.remove(og);r.a=mkAv(q.rg=="r15");r.a.g.position.copy(og.position);S.add(r.a.g);r.es=null}var es=JSON.stringify(q.e||{});if(r.es!==es){r.es=es;dressA(r.a,q.g=="f",String(q.n||"ผู้เล่น").slice(0,16),q.e)}});
+ for(var k in rem)if(!seen[k]){S.remove(rem[k].a.g);delete rem[k]}
+ $("oc").textContent="ผู้เล่นในห้อง: "+n+" คน"+(cur.p?" • รหัส "+cur.r.split("-").pop():"")}
+function netTick(dt){for(var k in rem){var r=rem[k],g=r.a.g,q=r.t,f=Math.min(1,dt*10);if(!q||!isFinite(q.x+q.y+q.z+q.r+q.w))continue;
+  g.position.x+=(q.x-g.position.x)*f;g.position.y+=(q.y-g.position.y)*f;g.position.z+=(q.z-g.position.z)*f;
+  var d=((q.r-g.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;g.rotation.y+=d*f;var w=Math.max(-1.3,Math.min(1.3,q.w)),p=r.a.pt;poseA(r.a,w,q.j|0,dt);if(typeof q.em=="string"&&q.em)emoAnim(r.a,q.em,performance.now()/1000)}
+ if(net){nacc+=dt;if(nacc>.066){nacc=0;var p2=av.position,u=U();net.presence({x:+p2.x.toFixed(2),y:+p2.y.toFixed(2),z:+p2.z.toFixed(2),r:+av.rotation.y.toFixed(2),w:+swv.toFixed(2),j:jst,rg:wal.rig||"r6",n:u.name,u:uid||"",g:u.gender,e:wal.eq,em:emT>0?emId:""}).catch(function(){})}}}
+function addChat(d){if(!d||typeof d.t!="string")return;if(muteAll||(d.u&&muted[String(d.u)]))return;if($("chat").hidden){unread++;$("ch").textContent="💬 "+unread}var l=document.createElement("div");l.textContent=String(d.n||"?").slice(0,16)+": "+d.t.slice(0,120);var c=$("cl");c.appendChild(l);while(c.children.length>6)c.removeChild(c.firstChild)}
+function sendChat(){var t=$("ci").value.trim();if(!t||!net)return;$("ci").value="";net.emit("chat",{n:U().name,u:uid||"",t:t.slice(0,120)}).catch(function(){toast("ส่งแชตไม่ได้ ต้องมีสิทธิ์ Contributor ขึ้นไป")})}
+$("cs").onclick=sendChat;$("ci").addEventListener("keydown",function(e){if(e.key=="Enter")sendChat()});
+function leaveNet(){if(net){net.leave();net=null;cur={g:"",r:"",p:0};beat()}clearRemotes();$("chat").hidden=true}
+
+/* ---------- input / camera ---------- */
+var scr="none",keys={},joy={x:0,y:0},yaw=0,pitch=.5,dist=22,jreq=false,tgt=new THREE.Vector3(0,2,0),drag=null,moved=0;
+addEventListener("keydown",function(e){if(e.target.tagName=="INPUT")return;if(e.code=="Escape"&&scr=="play"){if($("pm").hidden)pmOpen("u");else $("pm").hidden=true}keys[e.code]=true;if(e.code=="KeyE"&&scr=="play")doEmote();if(e.code=="Space"&&scr=="play"){jreq=true;e.preventDefault()}});addEventListener("keyup",function(e){keys[e.code]=false});
+cv.addEventListener("wheel",function(e){zoom(e.deltaY*.02)},{passive:true});
+function zoom(d){dist=Math.max(4,Math.min(80,dist+d))}
+var ray=new THREE.Raycaster();
+function pick(e){ray.setFromCamera(new THREE.Vector2(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1),cam);var h=ray.intersectObjects(world.children)[0];sel=h?h.object.userData.id:null;stab="p";mark();sheet()}
+var st=$("stick"),kn=$("kn"),sid=null;
+function mv(e){var r=st.getBoundingClientRect(),dx=e.clientX-(r.left+60),dy=e.clientY-(r.top+60),l=Math.hypot(dx,dy);if(l>50){dx*=50/l;dy*=50/l}kn.style.transform="translate("+dx+"px,"+dy+"px)";joy.x=dx/50;joy.y=dy/50}
+st.addEventListener("pointerdown",function(e){sid=e.pointerId;st.setPointerCapture(e.pointerId);mv(e)});st.addEventListener("pointermove",function(e){if(sid==e.pointerId)mv(e)});
+function rel(e){if(sid==e.pointerId){sid=null;joy.x=joy.y=0;kn.style.transform=""}}st.addEventListener("pointerup",rel);st.addEventListener("pointercancel",rel);
+$("jp").addEventListener("pointerdown",function(){jreq=true});
+
+/* ---------- play ---------- */
+var solids=[],vel=new THREE.Vector3(),grounded=false,H=2.4,RAD=.5,walk=0,spawnP=new THREE.Vector3(),ret="app";
+function startPlay(list,r,room,scs){list=JSON.parse(JSON.stringify(list));runParts=list;ret=r;leaveNet();camOff.set(0,0,0);unread=0;$("ch").textContent="💬";dress();rebuild(list);solids=[];
+ list.forEach(function(p){var m=meshOf(p.id);if(p.t=="spawn"){m.visible=false;if(!spawnP.set(p.p[0],p.p[1],p.p[2])){}}else if(p.k){solids.push(new THREE.Box3().setFromObject(m))}});
+ var sp0=list.filter(function(p){return p.t=="spawn"})[0];spawnP.set(sp0?sp0.p[0]:0,sp0?sp0.p[1]+.1:0,sp0?sp0.p[2]:0);
+ av.position.copy(spawnP);av.visible=true;vel.set(0,0,0);dist=11;pitch=.35;
+ $("app").hidden=true;$("gd").hidden=$("sv").hidden=$("fr").hidden=true;$("st").hidden=true;$("pl").hidden=false;cv.hidden=false;scr="play";mark();startScripts(scs);
+ if(room&&RM){$("chat").hidden=!SET.chat;$("oc").textContent="กำลังเข้าห้องออนไลน์…";RM.join(room).then(function(rm){if(scr!="play"){rm.leave();return}net=rm;cur=curNext;beat();rm.onPeers(function(c){syncPeers(c.peers)});rm.on("chat",function(m){addChat(m.data)})}).catch(function(){$("oc").textContent="เข้าห้องออนไลน์ไม่ได้ เล่นคนเดียว"})}}
+$("ex").onclick=function(){$("pm").hidden=$("qm").hidden=true;stopScripts();leaveNet();av.visible=false;$("pl").hidden=true;if(ret=="studio"){$("st").hidden=false;rebuild(parts);scr="edit";dist=22;pitch=.6;mark()}else{cv.hidden=true;scr="none";$("app").hidden=false;render()}};
+function cl(v,a,b){return Math.max(a,Math.min(b,v))}
+function step(dt){var ix=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0)+joy.x,iz=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0)+joy.y,l=Math.hypot(ix,iz);if(l>1){ix/=l;iz/=l;l=1}
+ var spd=(keys.ShiftLeft?14:9)*pspd*(l>.05?1:0),cs=Math.cos(yaw),sn=Math.sin(yaw),wx=(ix*cs+iz*sn)*spd,wz=(-ix*sn+iz*cs)*spd,p=av.position;
+ p.x+=wx*dt;p.z+=wz*dt;
+ solids.forEach(function(b){if(p.y<b.max.y-.3&&p.y+H>b.min.y){var nx=cl(p.x,b.min.x,b.max.x),nz=cl(p.z,b.min.z,b.max.z),dx=p.x-nx,dz=p.z-nz,d=Math.hypot(dx,dz);
+  if(d<RAD){if(d>1e-4){p.x=nx+dx/d*RAD;p.z=nz+dz/d*RAD}else{var a=[p.x-b.min.x,b.max.x-p.x,p.z-b.min.z,b.max.z-p.z],m=Math.min.apply(null,a);if(m==a[0])p.x=b.min.x-RAD;else if(m==a[1])p.x=b.max.x+RAD;else if(m==a[2])p.z=b.min.z-RAD;else p.z=b.max.z+RAD}}}});
+ if(jreq&&grounded){vel.y=18.6*pjmp;if(SET.hap&&navigator.vibrate)navigator.vibrate(25)}jreq=false;
+ var prev=p.y;vel.y-=50*dt;p.y+=vel.y*dt;grounded=false;if(p.y<=0){p.y=0;vel.y=0;grounded=true}
+ solids.forEach(function(b){if(p.x>b.min.x-.35&&p.x<b.max.x+.35&&p.z>b.min.z-.35&&p.z<b.max.z+.35){if(vel.y<=0&&prev>=b.max.y-.15&&p.y<=b.max.y){p.y=b.max.y;vel.y=0;grounded=true}else if(vel.y>0&&prev+H<=b.min.y+.15&&p.y+H>b.min.y){p.y=b.min.y-H;vel.y=0}}});
+ if(p.y<-40){p.copy(spawnP);vel.set(0,0,0)}
+ if(l>.05){var d2=((Math.atan2(wx,wz)-av.rotation.y+Math.PI*3)%(Math.PI*2))-Math.PI;av.rotation.y+=d2*Math.min(1,dt*12);walk+=dt*11}
+ var sw=l>.05?Math.sin(walk)*.8:0;swv=sw;jst=grounded?0:(vel.y>0?1:2);poseA(A,sw,jst,dt);if(l>.05&&emT>0){emT=0;pt.aLG.rotation.z=pt.aRG.rotation.z=0}if(emT>0){emT-=dt;emoAnim(A,emId,2.4-emT);if(emId=="e_spin")av.rotation.y+=dt*10;if(emT<=0)pt.aLG.rotation.z=pt.aRG.rotation.z=0}}
+
+/* ---------- studio ---------- */
+var G,parts,sel=null,stab="a",nm="p",hist=[],hi=-1,hlp=null;
+function cur(){return parts.filter(function(p){return p.id==sel})[0]}
+function commit(){hist=hist.slice(0,hi+1);hist.push(JSON.stringify(parts));hi++}
+function mark(){if(hlp){S.remove(hlp);hlp=null}var m=sel&&scr=="edit"?meshOf(sel):null;if(m){hlp=new THREE.BoxHelper(m,0xffd400);S.add(hlp)}}
+function openStudio(g){G=g;scripts=JSON.parse(JSON.stringify(g.scripts||[]));ssel=0;OUT=[];parts=JSON.parse(JSON.stringify(g.parts));sel=null;stab="a";hist=[];hi=-1;commit();rebuild(parts);dress();av.visible=false;tgt.set(0,2,0);dist=22;pitch=.6;
+ $("app").hidden=true;$("st").hidden=false;cv.hidden=false;scr="edit";sheet()}
+function saveG(){G.parts=JSON.parse(JSON.stringify(parts));G.scripts=JSON.parse(JSON.stringify(scripts));W("robx_games",games)}
+function setParts(s){parts=JSON.parse(s);sel=null;rebuild(parts);mark();sheet()}
+$("sx").onclick=function(){if((JSON.stringify(parts)!=JSON.stringify(G.parts)||JSON.stringify(scripts)!=JSON.stringify(G.scripts||[]))&&!confirm("มีการเปลี่ยนแปลงที่ยังไม่บันทึก ปิดเลย?"))return;$("st").hidden=true;cv.hidden=true;scr="none";mark();$("app").hidden=false;tab="c";render()};
+$("su").onclick=function(){if(hi>0)setParts(hist[--hi]);else toast("ไม่มีอะไรให้ย้อน")};
+$("sr").onclick=function(){if(hi<hist.length-1)setParts(hist[++hi]);else toast("ไม่มีอะไรให้ทำซ้ำ")};
+$("ss").onclick=function(){saveG();toast("บันทึกแล้ว")};
+$("sb").onclick=async function(){if(!parts.some(function(p){return p.t=="spawn"}))return toast("ต้องมีจุดเกิดอย่างน้อย 1 จุดก่อนเผยแพร่");G.published=true;saveG();
+ if(DB&&uid){try{await DB.doc("pub/"+uid).set({title:G.title,owner:U().name,cols:parts.slice(0,3).map(function(p){return p.c}),parts:JSON.stringify(parts),scripts:JSON.stringify(scripts),desc:G.desc||"",t:Date.now()});toast("เผยแพร่ออนไลน์แล้ว (แทนแมพเดิมที่เผยแพร่ของคุณ)")}catch(e){toast("เผยแพร่ออนไลน์ไม่สำเร็จ: "+(e&&e.message||"สิทธิ์ไม่พอ"))}}
+ else toast("เผยแพร่ในเครื่องแล้ว (โหมดออฟไลน์)")};
+$("sp").onclick=function(){startPlay(parts,"studio",null,scripts)};
+$("zi").onclick=function(){zoom(-4)};$("zo").onclick=function(){zoom(4)};
+var DEF={box:[4,4,4],sphere:[4,4,4],cyl:[4,4,4],wedge:[4,4,4],plane:[12,.5,12],spawn:[4,1,4]};
+var NM={box:"ก้อน",sphere:"ทรงกลม",cyl:"ทรงกระบอก",wedge:"ลิ่ม",plane:"พื้นแบน",spawn:"จุดเกิด"};
+function sheet(){var h="";[].forEach.call(document.querySelectorAll("[data-s]"),function(b){b.className=b.dataset.s==stab?"":"al"});
+ if(stab=="a"){h='<input class="in" id="gt" value="'+esc(G.title)+'" maxlength="40" aria-label="ชื่อแมพ"><textarea class="in" id="gdsc" maxlength="200" rows="2" placeholder="คำอธิบายแมพ">'+esc(G.desc||"")+'</textarea><div class="g3">'+Object.keys(NM).map(function(k){return'<button data-add="'+k+'">'+NM[k]+'</button>'}).join("")+'</div><p class="mu">วัตถุใหม่จะวางตรงจุดที่กล้องมอง</p>'}
+ else if(stab=="s"){h=scriptUI()}else if(stab=="e"){h=parts.map(function(p){return'<div class="ex'+(p.id==sel?" on":"")+'" data-sel="'+p.id+'">'+esc(p.n)+'</div>'}).join("")||'<p class="mu">ยังไม่มีวัตถุ</p>'}
+ else{var p=cur();if(!p)h='<p class="mu">แตะวัตถุในฉากหรือใน Explorer เพื่อแก้ไข</p>';else{
+  var n3=function(k,l){return'<div class="r3"><span>'+l+'</span>'+[0,1,2].map(function(i){return'<input type="number" step=".5" data-k="'+k+'" data-i="'+i+'" value="'+(+p[k][i].toFixed(2))+'">'}).join("")+'</div>'};
+  h='<input class="in" data-k="n" value="'+esc(p.n)+'" maxlength="24">'+n3("p","ตำแหน่ง")+n3("s","ขนาด")+
+  '<div class="r3"><span>หมุน Y°</span><input type="number" step="15" data-k="r" value="'+p.r+'"><input type="color" data-k="c" value="'+p.c+'"><label><input type="checkbox" data-k="k"'+(p.k?" checked":"")+'> ชนได้</label></div>'+
+  '<div class="r3"><span>โปร่งใส</span><input type="range" min="0" max=".9" step=".1" data-k="o" value="'+p.o+'"></div>'+
+  '<div class="g3"><button class="al" data-act="mode">โหมด: '+(nm=="p"?"ย้าย":"ขยาย")+'</button><button class="al" data-act="rot">หมุน 15°</button><button class="al" data-act="foc">โฟกัส</button></div>'+
+  '<div class="g3">'+["X−","X+","Y−","Y+","Z−","Z+"].map(function(l){return'<button class="al" data-n="'+l+'">'+l+'</button>'}).join("")+'</div>'+
+  '<div class="g3"><button data-act="dup">ทำสำเนา</button><button class="dng" data-act="del">ลบ</button></div>'}}
+ $("shb").innerHTML=h}
+var shb=$("shb");
+shb.addEventListener("click",function(e){var b=e.target.closest("button,.ex");if(!b)return;var d=b.dataset,p=cur();
+ if(d.add){var t=d.add=="plane"?"box":d.add,id=Date.now(),s=DEF[d.add];var np={id:id,n:NM[d.add]+" "+(parts.length+1),t:t,p:[Math.round(tgt.x),s[1]/2+(t=="spawn"?0:0),Math.round(tgt.z)],s:s.slice(),r:0,c:t=="spawn"?"#ffb703":"#"+("00000"+(Math.random()*0xffffff|0).toString(16)).slice(-6),o:0,k:t!="spawn"};if(t=="spawn")np.p[1]=0;parts.push(np);rebuild(parts);sel=id;stab="p";commit();mark();sheet()}
+ else if(d.sel){sel=+d.sel;stab="p";mark();sheet()}
+ else if(d.n&&p){var k=nm=="p"?"p":"s",i="XYZ".indexOf(d.n[0]),sg=d.n[1]=="+"?1:-1;p[k][i]=Math.max(k=="s"?.1:-999,p[k][i]+sg);upd(meshOf(p.id),p);hlp&&hlp.update();commit();sheet()}
+ else if(d.act=="mode"){nm=nm=="p"?"s":"p";sheet()}
+ else if(d.act=="rot"&&p){p.r=(p.r+15)%360;upd(meshOf(p.id),p);hlp&&hlp.update();commit();sheet()}
+ else if(d.act=="foc"&&p){tgt.set(p.p[0],p.p[1],p.p[2])}
+ else if(d.act=="dup"&&p){var c=JSON.parse(JSON.stringify(p));c.id=Date.now();c.n=p.n+" (สำเนา)";c.p[0]+=p.s[0]+1;parts.push(c);rebuild(parts);sel=c.id;commit();mark();sheet()}
+ else if(d.act=="del"&&p){parts=parts.filter(function(x){return x.id!=p.id});sel=null;rebuild(parts);commit();mark();sheet()}});
+shb.addEventListener("input",function(e){var t=e.target,k=t.dataset.k;if(t.id=="gt"){G.title=t.value||"แมพไม่มีชื่อ";return}if(t.id=="gdsc"){G.desc=t.value;return}if(!k)return;var p=cur();if(!p)return;var v=t.type=="checkbox"?t.checked:t.value;
+ if(k=="p"||k=="s"){var x=parseFloat(v)||0;p[k][+t.dataset.i]=k=="s"?Math.max(.1,x):x}else if(k=="r"||k=="o")p[k]=parseFloat(v)||0;else p[k]=v;
+ upd(meshOf(p.id),p);hlp&&hlp.update()});
+shb.addEventListener("change",function(e){if(e.target.dataset.k)commit();if(e.target.dataset.k=="n")sheet()});
+[].forEach.call(document.querySelectorAll("[data-s]"),function(b){b.onclick=function(){stab=b.dataset.s;sheet()}});
+
+/* ---------- loop ---------- */
+var clk=new THREE.Clock();
+function loop(){requestAnimationFrame(loop);var dt=Math.min(clk.getDelta(),.05);if(scr=="none")return;
+ var t;if(scr=="play"){step(dt);netTick(dt);scriptTick(dt);t=av.position.clone();t.y+=2;if(SET.cam=="free")t.add(camOff)}else{t=tgt;hlp&&hlp.update()}
+ cam.position.set(t.x+Math.sin(yaw)*Math.cos(pitch)*dist,Math.max(.3,t.y+Math.sin(pitch)*dist),t.z+Math.cos(yaw)*Math.cos(pitch)*dist);cam.lookAt(t);R.render(S,cam);if(shotReq){shotReq=false;grab()}statTick(dt)}
+function rs(){R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
+addEventListener("resize",rs);rs();loop();
+/* ---------- items / wallet ---------- */
+var CAT=[],ITEM={},TC={},FC={},wal={coins:1000,owned:[],eq:{emote:"e_wave"},hist:[],daily:0},adm=false,emT=0,emId="";
+(function(){function a(id,s,n,p,i,c,c2,k){var o={id:id,s:s,n:n,p:p,i:i,c:c,c2:c2||"#555",k:k};CAT.push(o);ITEM[id]=o}
+ [["sk1","ผิวขาว","#f6d7b8"],["sk2","ผิวน้ำผึ้ง","#f1c27d"],["sk3","ผิวแทน","#c68642"],["sk4","ผิวเข้ม","#8d5524"],["sk5","ผิวฟ้า","#8fd3ff"],["sk6","ผิวเขียว","#8be28b"],["sk7","ผิวม่วง","#b79cff"]].forEach(function(x){a(x[0],"skin",x[1],0,"",x[2])});
+ a("f0","face","ยิ้มกว้าง",0,"😊","#ffd54a","#ff9800","smile");a("f1","face","หน้าเท่",150,"😎","#42a5f5","#1a237e","cool");a("f2","face","ขยิบตา",200,"😉","#ffd54a","#e91e63","wink");a("f3","face","โกรธ",200,"😠","#ef5350","#7f0000","angry");a("f4","face","ตาโตน่ารัก",400,"🥺","#f48fb1","#ab47bc","kawaii");a("f5","face","ง่วงนอน",250,"😴","#90caf9","#3949ab","sleepy");
+ a("h1","hair","ผมสั้นดำ",0,"💇","#2b2b2b","#555","short");a("h2","hair","ผมยาวน้ำตาล",300,"💇","#6b3a1f","#a1662f","long");a("h3","hair","ผมสไปค์ฟ้า",600,"⚡","#29b6f6","#0277bd","spike");a("h4","hair","ผมมวยชมพู",500,"🎀","#f06292","#ad1457","bun");a("h5","hair","ผมแกละเงิน",900,"✨","#cfd8dc","#78909c","twin");a("h6","hair","ผมยาวน้ำค้างแข็ง",1200,"❄️","#e8f4ff","#90caf9","long");
+ a("ht1","hat","หมวกแก๊ปแดง",200,"🧢","#e53935","#b71c1c","cap");a("ht2","hat","หมวกแม่มดเปลวไฟ",500,"🧙","#2b2b3a","#ff7a00","wiz");a("ht3","hat","หัวฟักทองน้ำแข็ง",700,"🎃","#cfd8dc","#4dd0e1","pump");a("ht4","hat","หูแมว",400,"🐱","#ffb74d","#e65100","cat");a("ht5","hat","เขาปีศาจ",1500,"😈","#b71c1c","#ff5252","horn");a("ht6","hat","วงแหวนนางฟ้า",1800,"😇","#ffe082","#ffb300","halo");a("ht7","hat","มงกุฎทอง",2500,"👑","#ffca28","#ff8f00","crown");
+ a("g1","gl","แว่นดำ",350,"🕶️","#212121","#616161","dark");a("g2","gl","แว่นกลมทอง",450,"👓","#ffd54a","#a67c00","round");
+ a("sh1","shirt","เสื้อฮู้ดดำ",300,"🧥","#1c1c1c","#333","solid");a("sh2","shirt","เสื้อลายทางแดง",250,"👕","#e53935","#ffffff","stripe");a("sh3","shirt","เสื้อหมากรุก",350,"👕","#212121","#eeeeee","check");a("sh4","shirt","เสื้อกาแล็กซี่",800,"🌌","#311b92","#00acc1","grad");a("sh5","shirt","เสื้อสูทเรียบ",600,"🤵","#1b1f3a","#1b1f3a","solid");a("sh6","shirt","เสื้อฮาโลวีน",400,"🎃","#ff7a00","#111111","stripe");
+ a("pn1","pants","กางเกงยีนส์",250,"👖","#3b5b92","#3b5b92","solid");a("pn2","pants","กางเกงขาวดำ",300,"👖","#111111","#f5f5f5","check");a("pn3","pants","กางเกงเรืองแสง",700,"🌈","#00e5ff","#d500f9","grad");a("pn4","pants","กางเกงจุดสีชมพู",450,"👖","#f48fb1","#ffffff","dots");
+ a("b1","back","ปีกนางฟ้า",3000,"🪽","#ffffff","#ffe082","wa");a("b2","back","ปีกค้างคาว",2200,"🦇","#3b1d5a","#ff3d71","wb");a("b3","back","ผ้าคลุมแดง",900,"🦸","#c62828","#8e0000","cape");a("b4","back","กระเป๋าเป้",600,"🎒","#6d4c41","#ffb74d","pack");
+ a("e_wave","emote","โบกมือ",0,"👋","#4fc3f7","#0277bd");a("e_dance","emote","เต้น",800,"💃","#f06292","#7b1fa2");a("e_spin","emote","หมุนตัว",600,"🌀","#aed581","#33691e");
+})();
+var SL=[["skin","ผิว"],["face","ใบหน้า"],["hair","ผม"],["hat","หมวก"],["gl","แว่น"],["shirt","เสื้อ"],["pants","กางเกง"],["back","ประดับหลัง"],["emote","ท่าทาง"]];
+function unl(){var u=U();return!!u&&u.name==="TRK_pro1000y7"&&(DB&&uid?adm:true)}
+function coinS(){return unl()?"∞":wal.coins}
+function owned(it){return it.p==0||wal.owned.indexOf(it.id)>=0}
+async function loadWal(){var d=null;try{if(DB&&uid){var sn=await DB.doc("data/users/"+uid+"/wallet").get();d=sn.exists?sn.data():null}else d=J("robx_w_"+me,null)}catch(e){}
+ wal=Object.assign({coins:1000,owned:[],eq:{emote:"e_wave"},hist:[],daily:0},d||{});if(!Array.isArray(wal.owned))wal.owned=[];if(!wal.eq||typeof wal.eq!="object")wal.eq={};if(!Array.isArray(wal.hist))wal.hist=[]}
+function saveWal(){try{if(DB&&uid)DB.doc("data/users/"+uid+"/wallet").set(wal).catch(function(){toast("บันทึกกระเป๋าไม่ได้")});else W("robx_w_"+me,wal)}catch(e){}}
+function daily(){var l=864e5-(Date.now()-wal.daily);if(l>0)return toast("รับได้อีกครั้งใน "+Math.ceil(l/36e5)+" ชม.");wal.coins+=200;wal.daily=Date.now();saveWal();toast("ได้รับ 200 เหรียญ");if(scr=="avatar")aRender();else render()}
+function uiU(){var h='<div class="row"><div><b>เหรียญ ROBX</b><br><small class="mu">สกุลเงินจำลอง ไม่ใช่เงินจริง</small></div><b style="font-size:20px">'+coinS()+'</b></div><div class="g3" style="grid-template-columns:1fr 1fr"><button id="bav">แต่งตัวละคร / ร้านค้า</button><button class="al" id="bdl">รับเหรียญรายวัน</button></div>';
+ if(wal.hist.length)h+='<h2>ประวัติการซื้อ</h2>'+wal.hist.slice(0,8).map(function(x){return'<div class="row"><span>'+esc((ITEM[x.id]||{n:x.id}).n)+'</span><small class="mu">'+x.p+' เหรียญ • '+new Date(x.t).toLocaleDateString("th-TH")+'</small></div>'}).join("");return h}
+/* ---------- item models ---------- */
+function M3(g,c,em){return new THREE.Mesh(g,new THREE.MeshLambertMaterial({color:c,emissive:em||0}))}
+function bx(w,h,d,x,y,z,c,par,em){var m=M3(new THREE.BoxGeometry(w,h,d),c,em);m.position.set(x,y,z);m.castShadow=true;par.add(m);return m}
+function T(it){if(TC[it.id])return TC[it.id];var c=document.createElement("canvas");c.width=c.height=64;var g=c.getContext("2d");g.fillStyle=it.c;g.fillRect(0,0,64,64);g.fillStyle=it.c2;
+ if(it.k=="stripe")for(var i=0;i<64;i+=16)g.fillRect(0,i,64,8);
+ else if(it.k=="check")for(var y=0;y<8;y++)for(var x=0;x<8;x++)if((x+y)%2)g.fillRect(x*8,y*8,8,8);
+ else if(it.k=="grad"){var gr=g.createLinearGradient(0,0,64,64);gr.addColorStop(0,it.c);gr.addColorStop(1,it.c2);g.fillStyle=gr;g.fillRect(0,0,64,64);g.fillStyle="#fff";for(var j=0;j<14;j++)g.fillRect((j*37)%62,(j*53)%62,2,2)}
+ else if(it.k=="dots")for(var a=4;a<64;a+=16)for(var b=4;b<64;b+=16){g.beginPath();g.arc(a,b,4,0,7);g.fill()}
+ return TC[it.id]=new THREE.CanvasTexture(c)}
+function FT(k){if(FC[k])return FC[k];var c=document.createElement("canvas");c.width=c.height=64;var g=c.getContext("2d");g.fillStyle="#222";g.strokeStyle="#222";g.lineWidth=3;g.lineCap="round";
+ function eye(x,y,r){g.beginPath();g.arc(x,y,r,0,7);g.fill()}
+ if(k=="wink"){eye(22,26,4);g.beginPath();g.moveTo(38,26);g.lineTo(48,26);g.stroke()}else if(k=="sleepy"){g.beginPath();g.moveTo(16,27);g.lineTo(28,27);g.moveTo(36,27);g.lineTo(48,27);g.stroke()}
+ else if(k=="kawaii"){eye(22,28,7);eye(42,28,7);g.fillStyle="#fff";eye(24,26,2.5);eye(44,26,2.5);g.fillStyle="rgba(255,90,120,.5)";eye(12,40,5);eye(52,40,5)}
+ else if(k=="cool"){g.fillRect(14,24,14,4);g.fillRect(36,24,14,4)}else{eye(22,26,4);eye(42,26,4)}
+ g.beginPath();if(k=="angry"){g.moveTo(14,16);g.lineTo(28,22);g.moveTo(50,16);g.lineTo(36,22);g.stroke();g.beginPath();g.arc(32,50,8,Math.PI,0)}
+ else if(k=="sleepy")g.arc(32,46,4,0,7);else if(k=="kawaii")g.arc(32,42,4,0,Math.PI);else g.arc(32,38,12,.2,Math.PI-.2);g.stroke();
+ return FC[k]=new THREE.CanvasTexture(c)}
+function applyEq(a,eq){var p=a.pt;eq=eq&&typeof eq=="object"?eq:{};(a.ac||[]).forEach(function(o){if(o.parent)o.parent.remove(o)});a.ac=[];
+ function add(par){var o=new THREE.Group();par.add(o);a.ac.push(o);return o}
+ function it(sl){var x=ITEM[eq[sl]];return x&&x.s==sl?x:null}
+ var sk=it("skin");a.sk.forEach(function(k){p[k].material.color.set(sk?sk.c:"#f1c27d")});
+ var sh=it("shirt");if(sh)a.sh.forEach(function(k){p[k].material.map=T(sh);p[k].material.color.set("#fff")});
+ var pn=it("pants");if(pn)a.pn.forEach(function(k){p[k].material.map=T(pn);p[k].material.color.set("#fff")});
+ a.al.forEach(function(k){p[k].material.needsUpdate=true});
+ var fc=it("face"),fm=new THREE.Mesh(new THREE.PlaneGeometry(.9,.9),new THREE.MeshBasicMaterial({map:FT(fc?fc.k:"smile"),transparent:true}));fm.position.set(0,0,.505);p.headG.add(fm);a.ac.push(fm);
+ var hr=it("hair");p.hair.visible=!hr;if(hr)p.backG.visible=false;
+ if(hr){var o=add(p.headG),c=hr.c,k=hr.k;bx(1.15,.3,1.15,0,.55,0,c,o);bx(1.15,.25,.2,0,.4,.52,c,o);
+  if(k=="long"){bx(1.15,2,.3,0,-.4,-.55,c,o);bx(.2,1.2,.9,-.58,-.1,0,c,o);bx(.2,1.2,.9,.58,-.1,0,c,o)}
+  if(k=="spike")for(var i=0;i<5;i++){var cn=M3(new THREE.ConeGeometry(.18,.7,6),c);cn.position.set((i-2)*.25,.95,0);cn.rotation.z=(i-2)*-.15;o.add(cn)}
+  if(k=="bun"){var bn=M3(new THREE.SphereGeometry(.35,12,10),c);bn.position.set(0,.95,-.1);o.add(bn)}
+  if(k=="twin")[-1,1].forEach(function(s){var b2=M3(new THREE.SphereGeometry(.3,12,10),c);b2.position.set(s*.75,0,-.1);o.add(b2);bx(.15,.6,.15,s*.62,.25,-.1,c,o)})}
+ var ht=it("hat");if(ht){var h=add(p.headG),c1=ht.c,c2=ht.c2,k2=ht.k,m;
+  if(k2=="cap"){m=M3(new THREE.SphereGeometry(.62,16,10,0,6.3,0,1.57),c1);m.position.y=.42;h.add(m);bx(1,.08,.6,0,.45,.7,c1,h)}
+  if(k2=="wiz"){m=M3(new THREE.ConeGeometry(.5,1.3,16),c1);m.position.y=1.15;h.add(m);m=M3(new THREE.CylinderGeometry(.95,.95,.07,24),c1);m.position.y=.5;h.add(m);m=M3(new THREE.CylinderGeometry(1.0,1.0,.05,24),c2,c2);m.position.y=.47;h.add(m);m=M3(new THREE.CylinderGeometry(.52,.55,.15,16),c2,c2);m.position.y=.65;h.add(m)}
+  if(k2=="pump"){m=M3(new THREE.SphereGeometry(.85,16,12),c1);m.scale.y=.9;m.position.y=.1;h.add(m);bx(.2,.25,.05,-.28,.15,.78,c2,h,c2);bx(.2,.25,.05,.28,.15,.78,c2,h,c2);bx(.5,.12,.05,0,-.2,.8,c2,h,c2);bx(.12,.3,.12,0,.95,0,0x6d4c41,h)}
+  if(k2=="cat")[-1,1].forEach(function(s){m=M3(new THREE.ConeGeometry(.2,.45,4),c1);m.position.set(s*.3,.72,0);h.add(m)});
+  if(k2=="horn")[-1,1].forEach(function(s){m=M3(new THREE.ConeGeometry(.14,.8,8),c1,0x330000);m.position.set(s*.32,.85,0);m.rotation.z=-s*.3;h.add(m)});
+  if(k2=="halo"){m=M3(new THREE.TorusGeometry(.55,.07,8,24),c1,c2);m.rotation.x=1.57;m.position.y=1.2;h.add(m)}
+  if(k2=="crown"){m=M3(new THREE.CylinderGeometry(.55,.5,.3,10),c1,0x553d00);m.position.y=.65;h.add(m);for(var q=0;q<5;q++){var an=q/5*6.283;m=M3(new THREE.ConeGeometry(.1,.3,6),c1,0x553d00);m.position.set(Math.cos(an)*.5,.95,Math.sin(an)*.5);h.add(m)}}}
+ var gl=it("gl");if(gl){var g=add(p.headG);if(gl.k=="dark"){bx(.38,.22,.05,-.22,.08,.53,c1d(gl),g);bx(.38,.22,.05,.22,.08,.53,c1d(gl),g);bx(.14,.05,.05,0,.1,.53,c1d(gl),g)}else[-1,1].forEach(function(s){m=M3(new THREE.CylinderGeometry(.17,.17,.05,16),gl.c,gl.c2);m.rotation.x=1.57;m.position.set(s*.22,.08,.53);g.add(m)})}
+ var bk=it("back");if(bk){var b=add(p.torsoG),c=bk.c,d=bk.c2,k3=bk.k;
+  if(k3=="wa"||k3=="wb")[-1,1].forEach(function(s){var w=bx(1.6,1.5,.06,s*1.0,-.7,-.7,c,b);w.rotation.set(0,s*.55,s*.2);var w2=bx(1.1,.9,.06,s*1.3,-1.6,-.7,k3=="wa"?d:c,b,k3=="wb"?0:0x222222);w2.rotation.set(0,s*.55,s*.35);if(k3=="wb")for(var z=0;z<3;z++){var sp=bx(.08,1.1,.08,s*(.5+z*.55),-.5,-.75,d,b,0x440011);sp.rotation.z=s*(.3+z*.25)}});
+  if(k3=="cape"){var cp=bx(1.8,2.3,.06,0,-1.2,-.58,c,b);cp.rotation.x=.12}
+  if(k3=="pack"){bx(1.2,1.5,.5,0,-.9,-.78,c,b);bx(.8,.5,.15,0,-1.3,-1.05,d,b)}}}
+function c1d(g){return g.c}
+function emoAnim(a,e,t){var p=a.pt;if(e=="e_wave"){p.aRG.rotation.z=2.7+Math.sin(t*12)*.35;p.aRG.rotation.x=0}
+ else if(e=="e_dance"){var s=Math.sin(t*9);p.aLG.rotation.x=s*1.4;p.aRG.rotation.x=-s*1.4;p.aLG.rotation.z=-1.2;p.aRG.rotation.z=1.2;p.lLG.rotation.x=s*.6;p.lRG.rotation.x=-s*.6}
+ else if(e=="e_spin"){p.aLG.rotation.z=-1.4;p.aRG.rotation.z=1.4}}
+function doEmote(){var id=wal.eq.emote;if(!ITEM[id])return toast("ยังไม่ได้ใส่ท่าทาง ไปที่ ฉัน > แต่งตัวละคร");emId=id;emT=2.4}
+$("em").onclick=doEmote;
+/* ---------- avatar shop screen ---------- */
+var amd="w",asl="hair",aq="",aso=0,asel=null,pev={};
+function prev(){var u=U();dressA(A,u.gender=="f",u.name,pev)}
+function openAv(){scr="avatar";$("app").hidden=true;$("avs").hidden=false;cv.hidden=false;rebuild([]);S.background=new THREE.Color(0x261a66);S.fog=null;fl.visible=gr.visible=false;av.visible=true;av.position.set(0,0,0);av.rotation.y=0;tgt.set(0,2.4,0);dist=10;pitch=.12;yaw=0;pev=Object.assign({},wal.eq);asel=null;prev();aRender()}
+$("ax2").onclick=function(){$("avs").hidden=true;fl.visible=gr.visible=true;S.background=new THREE.Color(0x8fc8ff);S.fog=new THREE.Fog(0x8fc8ff,60,220);av.visible=false;cv.hidden=true;scr="none";dress();$("app").hidden=false;render()};
+$("ad").onclick=daily;
+function aRender(){$("ac").textContent="เหรียญ: "+coinS();
+ $("asheet").innerHTML='<div class="seg"><button data-am="w" class="'+(amd=="w"?"":"al")+'">ปรับแต่ง</button><button data-am="m" class="'+(amd=="m"?"":"al")+'">มาร์เก็ตเพลส</button></div><div class="seg" style="margin-bottom:4px"><button data-rig="r6" class="'+(wal.rig=="r15"?"al":"")+'">R6 คลาสสิก</button><button data-rig="r15" class="'+(wal.rig=="r15"?"":"al")+'">R15 สมจริง</button></div><div class="bar">'+SL.map(function(x){return'<button data-sl="'+x[0]+'" class="'+(asl==x[0]?"":"al")+'">'+x[1]+'</button>'}).join("")+'</div>'+
+ (amd=="m"?'<div class="r3" style="margin-top:6px"><input type="text" id="mq" class="in" style="margin:0" placeholder="ค้นหาไอเทม" value="'+esc(aq)+'"><button class="al" data-so="1" style="flex:none">ราคา: '+["ปกติ","ต่ำ→สูง","สูง→ต่ำ"][aso]+'</button></div>':'')+'<div class="ig" id="ag" style="margin-top:6px"></div><div class="act" id="aa"></div>';aGrid()}
+function aGrid(){var l=CAT.filter(function(x){return x.s==asl&&(amd=="m"?(!aq||x.n.indexOf(aq)>=0):owned(x))});if(aso==1)l.sort(function(a,b){return a.p-b.p});if(aso==2)l.sort(function(a,b){return b.p-a.p});
+ var h=amd=="w"&&asl!="skin"?'<div class="ic" data-it="-"><div class="ib" style="background:var(--bg)">∅</div><b>ไม่ใส่</b></div>':"";
+ h+=l.map(function(x){var o=owned(x);return'<div class="ic'+(pev[asl]==x.id?" on":"")+'" data-it="'+x.id+'"><div class="ib" style="background:linear-gradient(135deg,'+x.c+','+x.c2+')">'+x.i+'</div><b>'+esc(x.n)+'</b><small class="mu">'+(wal.eq[x.s]==x.id?"สวมใส่อยู่":o?(x.p?"มีแล้ว":"ฟรี"):x.p+" เหรียญ")+'</small></div>'}).join("");
+ $("ag").innerHTML=h||'<p class="mu">ไม่พบไอเทม</p>';
+ var it=asel&&ITEM[asel],a=$("aa");a.innerHTML=it?'<span><b>'+esc(it.n)+'</b><br><small class="mu">โดย ROBX • '+(owned(it)?"เป็นเจ้าของแล้ว":unl()?"ฟรีสำหรับคุณ":it.p+" เหรียญ")+'</small></span>'+(owned(it)?'<button data-ac="eq">'+(wal.eq[it.s]==it.id?"ถอด":"สวมใส่")+'</button>':'<button data-ac="buy">ซื้อ</button>'):'<span class="mu">แตะไอเทมเพื่อทดลองสวมใส่</span>'}
+$("asheet").addEventListener("click",function(e){var b=e.target.closest("[data-am],[data-sl],[data-so],[data-it],[data-ac]");if(!b)return;var d=b.dataset;
+ if(d.am){amd=d.am;asel=null;pev=Object.assign({},wal.eq);prev();aRender()}
+ else if(d.sl){asl=d.sl;asel=null;pev=Object.assign({},wal.eq);prev();aRender()}
+ else if(d.so){aso=(aso+1)%3;aRender()}
+ else if(d.it){if(d.it=="-"){delete wal.eq[asl];delete pev[asl];asel=null;saveWal()}else{var it=ITEM[d.it];asel=it.id;pev[it.s]=it.id;if(amd=="w"){wal.eq[it.s]=it.id;saveWal()}}prev();aGrid()}
+ else if(d.ac){var x=ITEM[asel];if(!x)return;
+  if(d.ac=="buy"){if(!unl()){if(wal.coins<x.p)return toast("เหรียญไม่พอ ขาดอีก "+(x.p-wal.coins)+" เหรียญ");wal.coins-=x.p}
+   wal.owned.push(x.id);wal.hist.unshift({id:x.id,p:unl()?0:x.p,t:Date.now()});wal.hist=wal.hist.slice(0,20);saveWal();toast("ซื้อ "+x.n+" สำเร็จ");$("ac").textContent="เหรียญ: "+coinS();aGrid()}
+  else{if(wal.eq[x.s]==x.id){delete wal.eq[x.s];delete pev[x.s]}else{wal.eq[x.s]=x.id;pev[x.s]=x.id}saveWal();prev();aGrid()}}});
+$("asheet").addEventListener("input",function(e){if(e.target.id=="mq"){aq=e.target.value.trim();aGrid()}});
+
+/* ---------- ROBX Script (ตัวแปลภาษาของเราเอง ไม่ใช้ eval) ---------- */
+var LIM=300000,steps=0,BAD=Object.create(null),AM=Object.create(null),SM=Object.create(null),OUT=[],scripts=[],ssel=0,tn=0;
+["__proto__","constructor","prototype"].forEach(function(k){BAD[k]=1});
+["push","pop","shift","unshift","indexOf","join","slice","includes","map","filter","forEach","reverse","concat","sort"].forEach(function(k){AM[k]=1});
+["toUpperCase","toLowerCase","includes","indexOf","slice","split","repeat","trim"].forEach(function(k){SM[k]=1});
+function tok(src){var T=[],i=0,ln=1,re=/(?:\s+|\/\/[^\n]*|\/\*[\s\S]*?\*\/)|(\d+(?:\.\d+)?(?:e[+-]?\d+)?)|([A-Za-z_$\u0E00-\u0E7F][\w$\u0E00-\u0E7F]*)|("(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*')|(===|!==|==|!=|<=|>=|&&|\|\||\?\?|=>|\+\+|--|\+=|-=|\*=|\/=|%=|[-+*\/%=<>!?:;,.(){}\[\]])/y,m;
+ while(i<src.length){re.lastIndex=i;m=re.exec(src);if(!m)throw new Error("บรรทัด "+ln+": อักขระไม่ถูกต้อง '"+src[i]+"'");var t=m[0];
+  if(m[1]!==undefined)T.push({t:"n",v:parseFloat(t),l:ln});else if(m[2]!==undefined)T.push({t:"i",v:t,l:ln});else if(m[3]!==undefined)T.push({t:"s",v:t.slice(1,-1).replace(/\\(.)/g,function(_,c){return c=="n"?"\n":c=="t"?"\t":c}),l:ln});else if(m[4]!==undefined)T.push({t:"o",v:t,l:ln});
+  ln+=(t.match(/\n/g)||[]).length;i+=t.length}
+ T.push({t:"e",v:"",l:ln});return T}
+function parse(src){var T=tok(src),p=0;
+ function bad(m){return new Error("บรรทัด "+T[Math.min(p,T.length-1)].l+": "+m)}
+ function is(v){var t=T[p];return(t.t=="o"||t.t=="i")&&t.v==v}
+ function eat(v){if(is(v)){p++;return true}return false}
+ function need(v){if(!eat(v))throw bad("ต้องมี '"+v+"' แต่พบ '"+(T[p].v||"จบไฟล์")+"'")}
+ function blk(){need("{");var b=[];while(!is("}")){if(T[p].t=="e")throw bad("ขาด '}' ปิดบล็อก");b.push(st())}need("}");return{k:"blk",b:b}}
+ function fn(){need("(");var ps=[];if(!is(")"))do{ps.push(T[p++].v)}while(eat(","));need(")");return{k:"fn",ps:ps,b:blk()}}
+ function arrow(ps){return{k:"fn",ps:ps,b:is("{")?blk():{k:"blk",b:[{k:"ret",e:asg()}]}}}
+ function st(){var t=T[p],l=t.l,n,c,e;
+  if(is("{"))return blk();
+  if(t.t=="i"){switch(t.v){
+   case"let":case"const":case"var":p++;var d=[];do{n=T[p++].v;var i0=null;if(eat("="))i0=asg();d.push([n,i0])}while(eat(","));eat(";");return{k:"var",d:d};
+   case"function":if(T[p+1].t=="i"){p++;n=T[p++].v;return{k:"var",d:[[n,fn()]],fd:1}}break;
+   case"if":p++;need("(");c=asg();need(")");var a=st(),b=null;if(eat("else"))b=st();return{k:"if",c:c,a:a,b:b};
+   case"while":p++;need("(");c=asg();need(")");return{k:"wh",c:c,b:st()};
+   case"for":p++;need("(");
+    if((is("let")||is("const")||is("var"))&&T[p+2].v=="of"){p++;n=T[p++].v;p++;var it=asg();need(")");return{k:"fo",n:n,it:it,b:st()}}
+    var init=null;if(is(";"))p++;else if(is("let")||is("const")||is("var"))init=st();else{init={k:"ex",e:asg()};need(";")}
+    c=is(";")?null:asg();need(";");var u=is(")")?null:asg();need(")");return{k:"for",i:init,c:c,u:u,b:st()};
+   case"return":p++;e=null;if(!is(";")&&!is("}")&&T[p].t!="e"&&T[p].l==l)e=asg();eat(";");return{k:"ret",e:e};
+   case"break":p++;eat(";");return{k:"brk"};case"continue":p++;eat(";");return{k:"cnt"}}}
+  e=asg();eat(";");return{k:"ex",e:e}}
+ function asg(){var l=cond();if(T[p].t=="o"&&/^(=|\+=|-=|\*=|\/=|%=)$/.test(T[p].v)){var op=T[p++].v;if(l.k!="id"&&l.k!="mem")throw bad("กำหนดค่าให้นิพจน์นี้ไม่ได้");return{k:"as",op:op,t:l,v:asg()}}return l}
+ function cond(){var c=bin(0);if(eat("?")){var a=asg();need(":");return{k:"cd",c:c,a:a,b:asg()}}return c}
+ var PR=[["??","||"],["&&"],["==","!=","===","!=="],["<",">","<=",">="],["+","-"],["*","/","%"]];
+ function bin(n){if(n>=PR.length)return un();var l=bin(n+1);while(T[p].t=="o"&&PR[n].indexOf(T[p].v)>=0){var op=T[p++].v;l={k:"bn",op:op,a:l,b:bin(n+1)}}return l}
+ function un(){var t=T[p];if(t.t=="o"&&(t.v=="!"||t.v=="-")){p++;return{k:"un",op:t.v,a:un()}}if(t.t=="i"&&t.v=="typeof"){p++;return{k:"un",op:"typeof",a:un()}}
+  if(t.t=="o"&&(t.v=="++"||t.v=="--")){p++;return{k:"as",op:t.v=="++"?"+=":"-=",t:un(),v:{k:"lit",v:1}}}
+  var e=call();if(T[p].t=="o"&&(T[p].v=="++"||T[p].v=="--"))return{k:"pf",op:T[p++].v,t:e};return e}
+ function call(){var e=prim();for(;;){var t=T[p];if(is(".")){p++;var n=T[p++];if(n.t!="i")throw bad("ต้องมีชื่อหลังจุด");e={k:"mem",o:e,p:{k:"lit",v:n.v},l:n.l}}
+  else if(is("[")){p++;var q=asg();need("]");e={k:"mem",o:e,p:q,l:t.l}}
+  else if(is("(")){p++;var a=[];if(!is(")"))do{a.push(asg())}while(eat(","));need(")");e={k:"call",f:e,a:a,l:t.l}}else break}return e}
+ function prim(){var t=T[p++];
+  if(t.t=="n"||t.t=="s")return{k:"lit",v:t.v};
+  if(t.t=="i"){if(t.v=="true")return{k:"lit",v:true};if(t.v=="false")return{k:"lit",v:false};if(t.v=="null")return{k:"lit",v:null};
+   if(t.v=="function"){if(T[p].t=="i")p++;return fn()}
+   if(is("=>")){p++;return arrow([t.v])}return{k:"id",n:t.v,l:t.l}}
+  if(t.v=="("&&t.t=="o"){var j=p,dp=1;while(j<T.length&&dp>0){if(T[j].t=="o"){if(T[j].v=="(")dp++;else if(T[j].v==")")dp--}j++}
+   if(T[j]&&T[j].v=="=>"){var ps=[];if(!is(")"))do{ps.push(T[p++].v)}while(eat(","));need(")");need("=>");return arrow(ps)}
+   var e=asg();need(")");return e}
+  if(t.v=="["&&t.t=="o"){var a=[];if(!is("]"))do{if(is("]"))break;a.push(asg())}while(eat(","));need("]");return{k:"arr",a:a}}
+  if(t.v=="{"&&t.t=="o"){var ps2=[];if(!is("}"))do{if(is("}"))break;var key=T[p++];need(":");ps2.push([String(key.v),asg()])}while(eat(","));need("}");return{k:"obj",ps:ps2}}
+  p--;throw bad("พบ '"+(t.v||"จบไฟล์")+"' ในตำแหน่งที่ไม่ถูกต้อง")}
+ var prog=[];while(T[p].t!="e")prog.push(st());return prog}
+function Env(par){this.v=Object.create(null);this.p=par}
+function look(env,n){for(var e=env;e;e=e.p)if(n in e.v)return e;return null}
+function tick(){if(++steps>LIM)throw new Error("สคริปต์ทำงานนานเกินไป (อาจวนลูปไม่รู้จบ)")}
+function getp(o,k,l){if(o==null)throw new Error("บรรทัด "+l+": อ่านค่า '"+k+"' จาก null/undefined ไม่ได้");
+ if(typeof k=="number"&&(Array.isArray(o)||typeof o=="string"))return o[k];k=String(k);if(BAD[k]||k[0]=="_")return undefined;
+ if(Array.isArray(o)){if(/^\d+$/.test(k))return o[+k];return k=="length"?o.length:AM[k]?o[k]:undefined}
+ if(typeof o=="string")return k=="length"?o.length:/^\d+$/.test(k)?o[+k]:SM[k]?o[k]:undefined;
+ if(typeof o!="object")return undefined;return Object.prototype.hasOwnProperty.call(o,k)?o[k]:undefined}
+function setp(o,k,v,l){if(o==null||typeof o!="object")throw new Error("บรรทัด "+l+": กำหนดค่าให้ค่านี้ไม่ได้");k=String(k);if(BAD[k]||k[0]=="_")throw new Error("บรรทัด "+l+": ชื่อคุณสมบัติไม่ได้รับอนุญาต");o[k]=v}
+function bop(op,a,b){switch(op){case"+":return a+b;case"-":return a-b;case"*":return a*b;case"/":return a/b;case"%":return a%b;case"<":return a<b;case">":return a>b;case"<=":return a<=b;case">=":return a>=b;case"==":return a==b;case"!=":return a!=b;case"===":return a===b;case"!==":return a!==b}}
+function setT(t,v,env){if(t.k=="id"){(look(env,t.n)||GL).v[t.n]=v}else setp(ev(t.o,env),ev(t.p,env),v,t.l)}
+function ev(n,env){tick();switch(n.k){
+ case"lit":return n.v;
+ case"id":{var e=look(env,n.n);if(!e)throw new Error("บรรทัด "+n.l+": ไม่รู้จัก '"+n.n+"'");return e.v[n.n]}
+ case"arr":return n.a.map(function(x){return ev(x,env)});
+ case"obj":{var o={};n.ps.forEach(function(q){if(!BAD[q[0]])o[q[0]]=ev(q[1],env)});return o}
+ case"fn":return function(){var a=arguments,e=new Env(env);n.ps.forEach(function(q,i){e.v[q]=a[i]});var r=exec(n.b,e);return r&&r.t=="r"?r.v:undefined};
+ case"un":{var v=ev(n.a,env);return n.op=="!"?!v:n.op=="-"?-v:typeof v}
+ case"bn":{var a=ev(n.a,env);if(n.op=="&&")return a?ev(n.b,env):a;if(n.op=="||")return a?a:ev(n.b,env);if(n.op=="??")return a==null?ev(n.b,env):a;return bop(n.op,a,ev(n.b,env))}
+ case"cd":return ev(n.c,env)?ev(n.a,env):ev(n.b,env);
+ case"mem":return getp(ev(n.o,env),ev(n.p,env),n.l);
+ case"call":{var f,th;if(n.f.k=="mem"){th=ev(n.f.o,env);f=getp(th,ev(n.f.p,env),n.l)}else f=ev(n.f,env);
+  var args=n.a.map(function(x){return ev(x,env)});if(typeof f!="function")throw new Error("บรรทัด "+n.l+": ค่านี้ไม่ใช่ฟังก์ชัน");return f.apply(th,args)}
+ case"as":{var val=ev(n.v,env);if(n.op!="=")val=bop(n.op[0],ev(n.t,env),val);setT(n.t,val,env);return val}
+ case"pf":{var c=ev(n.t,env);setT(n.t,n.op=="++"?c+1:c-1,env);return c}}
+ throw new Error("คำสั่งไม่รองรับ")}
+function runList(b,env){b.forEach(function(s){if(s.fd)exec(s,env)});for(var i=0;i<b.length;i++){if(b[i].fd)continue;var r=exec(b[i],env);if(r)return r}}
+function exec(n,env){tick();var r;switch(n.k){
+ case"blk":return runList(n.b,new Env(env));
+ case"var":n.d.forEach(function(q){env.v[q[0]]=q[1]?ev(q[1],env):undefined});return;
+ case"ex":ev(n.e,env);return;
+ case"if":if(ev(n.c,env))return exec(n.a,env);if(n.b)return exec(n.b,env);return;
+ case"wh":while(ev(n.c,env)){r=exec(n.b,env);if(r){if(r.t=="b")break;if(r.t=="r")return r}}return;
+ case"for":{var e=new Env(env);if(n.i)exec(n.i,e);while(!n.c||ev(n.c,e)){r=exec(n.b,e);if(r){if(r.t=="b")break;if(r.t=="r")return r}if(n.u)ev(n.u,e)}return}
+ case"fo":{var it=ev(n.it,env);if(!Array.isArray(it)&&typeof it!="string")throw new Error("for...of ใช้กับอาร์เรย์หรือข้อความเท่านั้น");for(var i=0;i<it.length;i++){var e2=new Env(env);e2.v[n.n]=it[i];r=exec(n.b,e2);if(r){if(r.t=="b")break;if(r.t=="r")return r}}return}
+ case"ret":return{t:"r",v:n.e?ev(n.e,env):undefined};case"brk":return{t:"b"};case"cnt":return{t:"c"}}}
+function msg(e){return e instanceof RangeError?"เรียกฟังก์ชันซ้อนลึกเกินไป":(e&&e.message)||String(e)}
+function fmt(v){if(v===undefined)return"undefined";if(v===null)return"null";if(typeof v=="object"){try{return JSON.stringify(v)}catch(e){return"[object]"}}return String(v)}
+function out(m){OUT.push(String(m).slice(0,300));if(OUT.length>100)OUT.shift();renderOut()}
+function renderOut(){var so=$("so");if(so)so.textContent=OUT.join("\n");var po=$("po");po.textContent=OUT.slice(-5).join("\n");po.hidden=!(scr=="play"&&OUT.length&&ret=="studio")}
+/* ---------- game API for scripts ---------- */
+var GL=null,SC={on:false,timers:[],touch:[],click:[]},runParts=[],dirty=false,pspd=1,pjmp=1;
+function prox(p){if(p._px)return p._px;var o={};Object.defineProperty(o,"_p",{value:p});
+ function d(k,g,s){Object.defineProperty(o,k,{enumerable:true,get:g,set:s})}
+ function ch(){var m=meshOf(p.id);if(m){upd(m,p);dirty=true}}
+ d("name",function(){return p.n});
+ ["x","y","z"].forEach(function(k,i){d(k,function(){return p.p[i]},function(v){v=+v;if(isFinite(v)){p.p[i]=v;ch()}})});
+ ["sx","sy","sz"].forEach(function(k,i){d(k,function(){return p.s[i]},function(v){v=+v;if(isFinite(v)){p.s[i]=Math.max(.1,v);ch()}})});
+ d("rot",function(){return p.r},function(v){p.r=+v||0;ch()});
+ d("color",function(){return p.c},function(v){if(/^#[0-9a-f]{6}$/i.test(v)){p.c=v;ch()}});
+ d("transparency",function(){return p.o},function(v){p.o=Math.max(0,Math.min(1,+v||0));ch()});
+ d("collide",function(){return p.k},function(v){p.k=!!v;dirty=true});
+ o.destroy=function(){var m=meshOf(p.id);if(m)world.remove(m);var i=runParts.indexOf(p);if(i>=0)runParts.splice(i,1);SC.touch=SC.touch.filter(function(t){return t.p!==p});SC.click=SC.click.filter(function(t){return t.p!==p});dirty=true};
+ return p._px=o}
+function recalcSolids(){solids=[];runParts.forEach(function(p){if(p.k&&p.t!="spawn"){var m=meshOf(p.id);if(m){m.updateMatrixWorld(true);solids.push(new THREE.Box3().setFromObject(m))}}})}
+var playerP=(function(){var o={};function d(k,g,s){Object.defineProperty(o,k,{enumerable:true,get:g,set:s})}
+ ["x","y","z"].forEach(function(k){d(k,function(){return av.position[k]},function(v){v=+v;if(isFinite(v)){av.position[k]=v;vel.set(0,0,0)}})});
+ d("name",function(){return U().name});d("speed",function(){return pspd},function(v){pspd=Math.max(0,Math.min(5,+v||0))});d("jumpPower",function(){return pjmp},function(v){pjmp=Math.max(0,Math.min(5,+v||0))});
+ o.teleport=function(x,y,z){x=+x;y=+y;z=+z;if(isFinite(x+y+z)){av.position.set(x,y,z);vel.set(0,0,0)}};o.respawn=function(){av.position.copy(spawnP);vel.set(0,0,0)};o.say=function(t){toast(String(t).slice(0,80))};return o})();
+function addTimer(s,per,f){if(typeof f!="function")throw new Error("after/every ต้องใส่ฟังก์ชัน");if(SC.timers.length>200)throw new Error("ตัวจับเวลามากเกินไป");SC.timers.push({t:Math.max(.05,+s||0),per:per?Math.max(.05,+s||0):0,f:f})}
+function mkG(){var g=new Env(null),V=g.v;
+ V.print=V.log=function(){out([].map.call(arguments,fmt).join(" "))};
+ V.Math={floor:Math.floor,ceil:Math.ceil,round:Math.round,abs:Math.abs,min:Math.min,max:Math.max,sqrt:Math.sqrt,sin:Math.sin,cos:Math.cos,pow:Math.pow,random:Math.random,PI:Math.PI};
+ V.PI=Math.PI;V.Number=Number;V.String=String;V.parseInt=parseInt;V.parseFloat=parseFloat;V.isNaN=isNaN;
+ V.random=function(a,b){if(a==null)return Math.random();if(b==null){b=a;a=0}return a+Math.random()*(b-a)};V.now=function(){return performance.now()/1000};
+ V.find=function(n){var p=runParts.filter(function(x){return x.n==n})[0];return p?prox(p):null};
+ V.findAll=function(n){return runParts.filter(function(x){return x.n==n}).map(prox)};
+ V.spawn=function(t,x,y,z,sx,sy,sz,c){if(runParts.length>400)throw new Error("วัตถุมากเกินไป");t=["sphere","cyl","wedge"].indexOf(t)>=0?t:"box";
+  var p={id:Date.now()+Math.random(),n:"สร้างโดยสคริปต์",t:t,p:[+x||0,+y||0,+z||0],s:[Math.max(.1,+sx||4),Math.max(.1,+sy||4),Math.max(.1,+sz||4)],r:0,c:/^#[0-9a-f]{6}$/i.test(c)?c:"#9e9e9e",o:0,k:true};
+  runParts.push(p);var m=new THREE.Mesh(geo(t),new THREE.MeshLambertMaterial());m.castShadow=m.receiveShadow=true;m.userData.id=p.id;upd(m,p);world.add(m);dirty=true;return prox(p)};
+ V.after=function(s,f){addTimer(s,0,f)};V.every=function(s,f){addTimer(s,s,f)};
+ V.onTouch=function(o,f){if(!o||!o._p||typeof f!="function")throw new Error("onTouch(วัตถุ, ฟังก์ชัน)");SC.touch.push({p:o._p,f:f,in:false})};
+ V.onClick=function(o,f){if(!o||!o._p||typeof f!="function")throw new Error("onClick(วัตถุ, ฟังก์ชัน)");SC.click.push({p:o._p,f:f})};
+ V.hud=function(t){$("hud").textContent=String(t).slice(0,80)};
+ V.sky=function(c){if(/^#[0-9a-f]{6}$/i.test(c))S.background=new THREE.Color(c)};
+ V.player=playerP;return g}
+function safe(f,a){steps=0;try{f.apply(null,a||[])}catch(e){out("[ผิดพลาด] "+msg(e))}}
+function startScripts(scs){SC={on:true,timers:[],touch:[],click:[]};pspd=pjmp=1;dirty=false;$("hud").textContent="";OUT=[];GL=mkG();renderOut();
+ if(!Array.isArray(scs))return;scs.slice(0,10).forEach(function(s){if(!s||typeof s.src!="string")return;try{steps=0;runList(parse(s.src.slice(0,20000)),new Env(GL))}catch(e){out("["+String(s.n||"สคริปต์").slice(0,20)+"] "+msg(e))}})}
+function stopScripts(){SC={on:false,timers:[],touch:[],click:[]};S.background=new THREE.Color(0x8fc8ff);$("hud").textContent="";$("po").hidden=true}
+function scriptTick(dt){if(!SC.on)return;if(dirty){recalcSolids();dirty=false}
+ var ap=av.position,pb=new THREE.Box3(new THREE.Vector3(ap.x-.5,ap.y,ap.z-.5),new THREE.Vector3(ap.x+.5,ap.y+H,ap.z+.5));
+ SC.touch.forEach(function(t){var m=meshOf(t.p.id);if(!m)return;var i=new THREE.Box3().setFromObject(m).expandByScalar(.15).intersectsBox(pb);if(i&&!t.in)safe(t.f,[playerP]);t.in=i});
+ for(var i=SC.timers.length-1;i>=0;i--){var tm=SC.timers[i];if(!tm)continue;tm.t-=dt;if(tm.t<=0){if(tm.per>0)tm.t=tm.per;else SC.timers.splice(i,1);safe(tm.f)}}}
+function playClick(e){if(!SC.on||!SC.click.length)return;ray.setFromCamera(new THREE.Vector2(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1),cam);var h=ray.intersectObjects(world.children)[0];if(!h)return;SC.click.slice().forEach(function(c){if(c.p.id==h.object.userData.id)safe(c.f,[playerP])})}
+/* editor UI */
+var TPL=['// ประตู: แตะแล้วโปร่งใสและเดินผ่านได้ (ตั้งชื่อวัตถุว่า ประตู)\nvar door = find("ประตู")\nif (door) {\n  onTouch(door, function() {\n    door.transparency = 0.7\n    door.collide = false\n    hud("ผ่านประตูแล้ว!")\n  })\n}\n','// จุดวาร์ป: ตั้งชื่อวัตถุว่า วาร์ป\nvar pad = find("วาร์ป")\nif (pad) {\n  onTouch(pad, function() {\n    player.teleport(0, 10, 0)\n    player.say("วาร์ป!")\n  })\n}\n','// เก็บเหรียญ\nvar score = 0\nfunction makeCoin(x, z) {\n  var coin = spawn("sphere", x, 1.5, z, 1.5, 1.5, 1.5, "#ffd54a")\n  coin.collide = false\n  onTouch(coin, function() {\n    score = score + 1\n    hud("เหรียญ: " + score)\n    coin.destroy()\n  })\n}\nfor (var i = 0; i < 8; i++) {\n  makeCoin(random(-20, 20), random(-20, 20))\n}\nhud("เก็บเหรียญให้ครบ!")\n','// ท้องฟ้าเปลี่ยนสีทุก 3 วินาที และกระโดดสูงขึ้น\nplayer.jumpPower = 1.6\nvar cols = ["#8fc8ff", "#ffb4a2", "#b5e48c", "#cdb4db"]\nvar n = 0\nevery(3, function() {\n  sky(cols[n % cols.length])\n  n++\n})\n'];
+function scriptUI(){var s=scripts[ssel];return'<div class="bar" style="padding:0 0 6px;background:none">'+scripts.map(function(x,i){return'<button data-sc="'+i+'" class="'+(i==ssel?"":"al")+'">'+esc(x.n)+'</button>'}).join("")+'<button class="al" data-sc="+">＋ใหม่</button></div>'+(s?'<textarea id="se" spellcheck="false" autocapitalize="off" autocomplete="off" style="width:100%;height:130px;box-sizing:border-box;background:var(--bg);color:var(--ink);font:13px/1.4 monospace;border:1px solid var(--mu);border-radius:8px;padding:8px">'+esc(s.src)+'</textarea><div class="g3"><button data-scc="chk">ตรวจสอบ</button><button class="al" data-scc="tpl">ตัวอย่าง</button><button class="dng" data-scc="del">ลบ</button></div><input class="in" id="sn" value="'+esc(s.n)+'" maxlength="20" aria-label="ชื่อสคริปต์"><pre id="so" style="background:var(--bg);border-radius:8px;padding:8px;font-size:12px;white-space:pre-wrap;min-height:40px">'+esc(OUT.join("\n"))+'</pre><p class="mu" style="font-size:12px">กด "เล่น" ด้านบนเพื่อรันสคริปต์ API: find(ชื่อ), spawn(ชนิด,x,y,z,กว้าง,สูง,ลึก,สี), onTouch(วัตถุ,fn), onClick(วัตถุ,fn), every(วิ,fn), after(วิ,fn), hud(ข้อความ), player.teleport(x,y,z), player.speed, player.jumpPower, sky(สี), print(...)</p>':'<p class="mu">ยังไม่มีสคริปต์ กด ＋ใหม่</p>')}
+shb.addEventListener("click",function(e){var b=e.target.closest("[data-sc],[data-scc]");if(!b)return;var d=b.dataset,s=scripts[ssel];
+ if(d.sc){if(d.sc=="+"){if(scripts.length>=10)return toast("สูงสุด 10 สคริปต์");scripts.push({n:"สคริปต์"+(scripts.length+1),src:""});ssel=scripts.length-1}else ssel=+d.sc;sheet()}
+ else if(!s)return;
+ else if(d.scc=="chk"){OUT=[];try{parse(s.src);out("✓ ไวยากรณ์ถูกต้อง")}catch(er){out("✗ "+msg(er))}}
+ else if(d.scc=="tpl"){s.src+=(s.src?"\n":"")+TPL[tn++%TPL.length];sheet()}
+ else if(d.scc=="del"){scripts.splice(ssel,1);ssel=0;sheet()}});
+shb.addEventListener("input",function(e){var s=scripts[ssel];if(!s)return;if(e.target.id=="se")s.src=e.target.value;if(e.target.id=="sn")s.n=e.target.value.slice(0,20)||"สคริปต์"});
+/* ---------- friends / servers / game page ---------- */
+var PL=[],REQ={},SRV=[],LK={},LKM={},cur={g:"",r:"",p:0},curNext=cur,MAXP=16,hb=null,rt=null,GD=null,gpop="",svSort=0,svHide=true;
+function refresh(){clearTimeout(rt);rt=setTimeout(function(){if(!$("fr").hidden)frRender();if(!$("sv").hidden)svRender();if(!$("gd").hidden)gdRender();if(tab=="h"&&!$("app").hidden&&me)render()},350)}
+function subs(){function L(c,f){DB.collection(c).onSnapshot(function(q){f(q.docs);refresh()},function(){})}
+ L("players",function(d){PL=d.map(function(x){var o=x.data();o.id=x.id;return o})});
+ L("req",function(d){REQ={};d.forEach(function(x){REQ[x.id]=x.data()})});
+ L("srv",function(d){SRV=d.map(function(x){var o=x.data();o.id=x.id;return o})});
+ L("lk",function(d){LK={};d.forEach(function(x){LK[x.id]=x.data()});LKM=LK[uid]||{}})}
+function beat(){if(DB&&uid&&me)DB.doc("srv/"+uid).set({g:cur.g,r:cur.r,p:cur.p,n:(U()||{}).name||"",t:Date.now()}).catch(function(){})}
+function startBeat(){clearInterval(hb);beat();hb=setInterval(beat,15000)}
+function fresh(s){return Date.now()-(s.t||0)<60000}
+function gid(g){return String(g.id).toLowerCase().replace(/[^a-z0-9]/g,"").slice(0,24)}
+function rnd(){return Math.random().toString(36).slice(2,6)}
+function roomsOf(g){var m={};SRV.forEach(function(s){if(s.g==gid(g)&&s.r&&!s.p&&fresh(s))(m[s.r]=m[s.r]||[]).push(s)});return m}
+function roomCount(r){return SRV.filter(function(s){return s.r==r&&fresh(s)}).length}
+function pickRoom(g){var m=roomsOf(g),best=null,bn=-1;for(var r in m){var n=m[r].length;if(n<MAXP&&n>bn){best=r;bn=n}}return best||"g-"+gid(g)+"-"+rnd()}
+function gameOf(x){return pubAll().filter(function(g){return g.cols&&gid(g)==x})[0]}
+function to(u){return(REQ[u]&&REQ[u].to)||[]}function no(){return(REQ[uid]&&REQ[uid].no)||[]}
+function isF(u){return to(uid).indexOf(u)>=0&&to(u).indexOf(uid)>=0}
+function friends(){return PL.filter(function(p){return p.id!=uid&&isF(p.id)})}
+function inc(){return PL.filter(function(p){return p.id!=uid&&to(p.id).indexOf(uid)>=0&&to(uid).indexOf(p.id)<0&&no().indexOf(p.id)<0})}
+function outg(){return PL.filter(function(p){return p.id!=uid&&to(uid).indexOf(p.id)>=0&&!isF(p.id)})}
+function stOf(u){return SRV.filter(function(x){return x.id==u&&fresh(x)})[0]||null}
+function saveReq(t,n){REQ[uid]={to:t,no:n};DB.doc("req/"+uid).set({to:t,no:n}).catch(function(){toast("บันทึกไม่ได้ ต้องมีสิทธิ์ Contributor ขึ้นไป")});refresh()}
+function frRow(){if(!(DB&&uid))return'<h2>เพื่อน</h2><p class="mu">ระบบเพื่อนใช้ได้เมื่อออนไลน์</p>';var n=inc().length,h='<h2>เพื่อน</h2><div class="fr"><div style="text-align:center;position:relative" data-fr="1"><div class="av">+</div>'+(n?'<span class="bdg">'+n+'</span>':'')+'<small>เพิ่มเพื่อน</small></div>';
+ friends().forEach(function(f){h+='<div style="text-align:center;position:relative;max-width:72px" data-fr="1"><div class="av">'+esc((f.name||"?")[0].toUpperCase())+'</div>'+(stOf(f.id)?'<i class="dot"></i>':'')+'<small>'+esc(f.name)+'</small></div>'});return h+'</div>'}
+function openFr(){if(!(DB&&uid))return toast("ระบบเพื่อนต้องใช้งานแบบออนไลน์");$("fr").hidden=false;frRender()}
+$("fx").onclick=function(){$("fr").hidden=true};$("fq").addEventListener("input",frRender);
+function frRender(){var q=$("fq").value.trim().toLowerCase(),h="";
+ function row(p,btns,sub){return'<div class="row"><div class="fr" style="align-items:center"><div class="av" style="width:44px;height:44px;font-size:18px">'+esc((p.name||"?")[0].toUpperCase())+'</div><div><b>'+esc(p.name)+'</b><br><small class="mu">'+sub+'</small></div></div><div>'+btns+'</div></div>'}
+ function B(a,u,t,c){return'<button class="'+(c||"")+'" data-fa="'+a+'" data-u="'+esc(u)+'">'+t+'</button> '}
+ if(q){var r=PL.filter(function(p){return p.id!=uid&&String(p.name).toLowerCase().indexOf(q)>=0}).slice(0,8);h+='<h2>ผลการค้นหา</h2>'+(r.length?r.map(function(p){var b=isF(p.id)?'<small class="mu">เป็นเพื่อนแล้ว</small>':to(uid).indexOf(p.id)>=0?B("cancel",p.id,"ยกเลิกคำขอ","al"):to(p.id).indexOf(uid)>=0?B("acc",p.id,"รับเป็นเพื่อน"):B("add",p.id,"เพิ่มเพื่อน");return row(p,b,p.gender=="f"?"หญิง":"ชาย")}).join(""):'<p class="mu">ไม่พบผู้เล่นชื่อนี้ (ต้องลงทะเบียนแล้ว)</p>')}
+ var I=inc();h+='<h2>คำขอที่ได้รับ ('+I.length+')</h2>'+(I.length?I.map(function(p){return row(p,B("acc",p.id,"รับ")+B("dec",p.id,"ปฏิเสธ","al"),"อยากเป็นเพื่อนกับคุณ")}).join(""):'<p class="mu">ไม่มีคำขอ</p>');
+ var O=outg();if(O.length)h+='<h2>คำขอที่ส่งแล้ว</h2>'+O.map(function(p){return row(p,B("cancel",p.id,"ยกเลิก","al"),"รอการตอบรับ")}).join("");
+ var F=friends();h+='<h2>เพื่อน ('+F.length+')</h2>'+(F.length?F.map(function(p){var s=stOf(p.id),gm=s&&s.g?gameOf(s.g):null;return row(p,(gm?B("join",p.id,"เข้าร่วม"):"")+B("del",p.id,"ลบ","dng"),s?(gm?"กำลังเล่น: "+esc(gm.title):"ออนไลน์"):"ออฟไลน์")}).join(""):'<p class="mu">ยังไม่มีเพื่อน</p>');
+ $("fl").innerHTML=h}
+$("fl").addEventListener("click",function(e){var b=e.target.closest("[data-fa]");if(!b)return;var a=b.dataset.fa,u=b.dataset.u,t=to(uid).slice(),n=no().slice();
+ if(a=="add"||a=="acc"){if(t.indexOf(u)<0)t.push(u);saveReq(t,n.filter(function(x){return x!=u}))}
+ else if(a=="cancel"||a=="del")saveReq(t.filter(function(x){return x!=u}),n);
+ else if(a=="dec"){if(n.indexOf(u)<0)n.push(u);saveReq(t,n)}
+ else if(a=="join"){var s=stOf(u),g=s&&gameOf(s.g);if(g){$("fr").hidden=true;playGame(g,s.r,s.p)}}});
+function openGd(g){GD=g;gpop="";$("gd").hidden=false;gdRender()}
+function gdRender(){var g=GD;if(!g)return;var v=[0,0],n=0,np=0,ns=0;for(var k in LK){var x=LK[k]&&LK[k][g.id];if(x==1)v[0]++;else if(x==-1)v[1]++}
+ var my=LKM[g.id]||0,pc=v[0]+v[1]?Math.round(v[0]*100/(v[0]+v[1]))+"%":"—";SRV.forEach(function(s){if(s.g==gid(g)&&fresh(s))n++});
+ try{np=(typeof g.parts=="string"?JSON.parse(g.parts):g.parts).length;var sc=typeof g.scripts=="string"?JSON.parse(g.scripts):g.scripts;ns=(sc||[]).length}catch(e){}
+ function ir(a,b){return'<div class="row" style="background:none;border-bottom:1px solid var(--p2);border-radius:0"><span class="mu">'+a+'</span><b>'+b+'</b></div>'}
+ $("gd").innerHTML='<div class="top"><button class="al" id="gx" aria-label="ปิด">✕</button></div><div style="flex:1;overflow:auto;padding:0 16px"><h1 style="margin:0">'+esc(g.title)+'</h1><div class="mu">โดย '+esc(g.owner)+'</div><div class="cover" style="background:'+thumb(g)+'"></div><div class="fr" style="margin:12px 0;align-items:center"><button class="al" data-v="1" style="'+(my==1?"outline:2px solid var(--ac)":"")+'">👍 '+pc+'</button><button class="al" data-v="-1" style="'+(my==-1?"outline:2px solid var(--rd)":"")+'" aria-label="ไม่ถูกใจ">👎</button><span style="white-space:nowrap">👥 ใช้งานอยู่ '+n+' คน</span></div><h2>คำอธิบาย</h2><p class="mu">'+esc(g.desc||"ไม่มีคำอธิบาย")+'</p><h2>ข้อมูล</h2>'+ir("ผู้สร้าง",esc(g.owner))+ir("ขนาดเซิร์ฟเวอร์",MAXP)+ir("จำนวนวัตถุ",np)+ir("สคริปต์",ns)+'</div><div class="gbar">'+(gpop=="m"?'<div class="pop" style="left:12px"><button class="al" data-pp="copy">คัดลอกลิงก์</button></div>':'')+(gpop=="j"?'<div class="pop" style="left:70px"><button class="al" data-pp="inv">เชิญเพื่อน</button><button class="al" data-pp="priv">สร้างเซิร์ฟเวอร์ส่วนตัว</button><button class="al" data-pp="srv">เข้าร่วมกับเพื่อนๆ</button></div>':'')+'<button class="al" id="gm" aria-label="เมนู">⋯</button><button class="al" id="gj" aria-label="เซิร์ฟเวอร์">👥▶</button><button id="gp" style="flex:1">▶ เล่น</button></div>'}
+$("gd").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;var g=GD,d=b.dataset;
+ if(b.id=="gx"){$("gd").hidden=true;gpop=""}
+ else if(b.id=="gm"){gpop=gpop=="m"?"":"m";gdRender()}else if(b.id=="gj"){gpop=gpop=="j"?"":"j";gdRender()}
+ else if(b.id=="gp"){gpop="";$("gd").hidden=true;playGame(g)}
+ else if(d.v){if(!(DB&&uid))return toast("โหวตได้เมื่อออนไลน์");var v=+d.v;LKM[g.id]=LKM[g.id]==v?0:v;LK[uid]=LKM;DB.doc("lk/"+uid).set(LKM).catch(function(){toast("โหวตไม่ได้ ต้องมีสิทธิ์ Contributor ขึ้นไป")});gdRender()}
+ else if(d.pp){var p=d.pp;gpop="";
+  if(p=="copy"||p=="inv"){var t=p=="inv"?"มาเล่น "+g.title+" บน ROBX กับฉัน (ชื่อ "+U().name+") เพิ่มฉันเป็นเพื่อนแล้วกดเข้าร่วม":location.href;if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){toast("คัดลอกแล้ว")},function(){toast(t)});else toast(t);gdRender()}
+  else if(p=="priv"){if(!(DB&&RM&&g.cols&&uid))return toast("ต้องออนไลน์และเป็นเกมที่เผยแพร่ออนไลน์");var c=rnd();toast("รหัสห้อง: "+c);$("gd").hidden=true;playGame(g,"p-"+gid(g)+"-"+c,1)}
+  else openSv()}});
+function openSv(){if(!(DB&&RM&&GD&&GD.cols&&uid))return toast("ต้องออนไลน์และเป็นเกมที่เผยแพร่ออนไลน์");$("sv").hidden=false;svRender()}
+$("svx").onclick=function(){$("sv").hidden=true};
+function svRender(){var g=GD,m=roomsOf(g),l=Object.keys(m).map(function(r){return{r:r,p:m[r]}});if(svHide)l=l.filter(function(x){return x.p.length<MAXP});if(svSort==1)l.sort(function(a,b){return b.p.length-a.p.length});if(svSort==2)l.sort(function(a,b){return a.p.length-b.p.length});
+ var fs=friends().map(function(f){return{f:f,s:stOf(f.id)}}).filter(function(x){return x.s&&x.s.g==gid(g)&&x.s.r});
+ var h='<h2>เซิร์ฟเวอร์ส่วนตัว</h2><p class="mu">เล่นในพื้นที่ของคุณเอง เล่นเดี่ยวหรือกับเพื่อนที่ให้รหัสห้อง</p><button id="spv" style="width:100%">สร้างเซิร์ฟเวอร์ส่วนตัวฟรี</button><div class="r3" style="margin-top:8px"><input type="text" class="in" id="scd" style="margin:0" placeholder="รหัสห้องจากเพื่อน" maxlength="8"><button class="al" id="sjc" style="flex:none">เข้าด้วยรหัส</button></div>'+
+ '<h2>เซิร์ฟเวอร์ที่เพื่อนของฉันใช้อยู่ <button class="al" id="srf" style="float:right;padding:4px 10px">รีเฟรช</button></h2>'+(fs.length?fs.map(function(x){return'<div class="row"><span>'+esc(x.f.name)+'</span><button data-jf="'+esc(x.f.id)+'">เข้าร่วม</button></div>'}).join(""):'<p class="mu" style="text-align:center">ไม่พบเซิร์ฟเวอร์</p>')+
+ '<h2>เซิร์ฟเวอร์อื่นๆ</h2><div class="r3"><span>เรียงตาม</span><select id="sso" class="in" style="margin:0"><option value="0"'+(svSort==0?" selected":"")+'>แนะนำสำหรับคุณ</option><option value="1"'+(svSort==1?" selected":"")+'>คนมากสุด</option><option value="2"'+(svSort==2?" selected":"")+'>คนน้อยสุด</option></select></div><label style="display:flex;gap:8px;margin:8px 0"><input type="checkbox" id="shd"'+(svHide?" checked":"")+'> ไม่รวมเซิร์ฟเวอร์ที่เต็มแล้ว</label>'+
+ (l.length?'<div class="sg">'+l.map(function(x){var n=x.p.length;return'<div class="sc"><div class="sav">'+[0,1,2,3].map(function(i){return'<i>'+(x.p[i]?esc((x.p[i].n||"?")[0].toUpperCase()):"")+'</i>'}).join("")+'</div><small class="mu">'+n+' คนจากสูงสุด '+MAXP+' คน</small><div class="pb"><i style="width:'+Math.round(n/MAXP*100)+'%"></i></div><button class="al" data-jr="'+esc(x.r)+'">เข้าร่วม</button><small class="mu">ID: '+esc(x.r.split("-").pop())+'</small></div>'}).join("")+'</div>':'<p class="mu" style="text-align:center">ยังไม่มีเซิร์ฟเวอร์สาธารณะ กดเล่นเพื่อสร้างใหม่</p>');
+ $("sl").innerHTML=h}
+$("sl").addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;var g=GD,d=b.dataset;
+ if(b.id=="spv"){var c=rnd();toast("รหัสห้อง: "+c);$("sv").hidden=true;playGame(g,"p-"+gid(g)+"-"+c,1)}
+ else if(b.id=="sjc"){var c2=$("scd").value.toLowerCase().replace(/[^a-z0-9]/g,"");if(!c2)return toast("ใส่รหัสห้อง");$("sv").hidden=true;playGame(g,"p-"+gid(g)+"-"+c2,1)}
+ else if(b.id=="srf")svRender();
+ else if(d.jr){$("sv").hidden=true;playGame(g,d.jr,0)}
+ else if(d.jf){var s=stOf(d.jf);if(s&&s.r){$("sv").hidden=true;playGame(g,s.r,s.p)}else toast("เพื่อนออกจากเซิร์ฟเวอร์แล้ว")}});
+$("sl").addEventListener("change",function(e){if(e.target.id=="sso"){svSort=+e.target.value;svRender()}if(e.target.id=="shd"){svHide=e.target.checked;svRender()}});
+
+/* ---------- in-game menu / settings / camera ---------- */
+var SET=Object.assign({cam:"follow",inv:false,sens:5,names:true,stats:false,gq:7,hap:false,chat:true},J("robx_set",{}));
+var pmT="u",pmGrid=true,pmSel=null,pmView=-1,muteAll=false,muted={},unread=0,shotReq=false,camOff=new THREE.Vector3(),SHOTS=J("robx_shots",[]),sfc=0,sft=0;
+var OPTS=[["cam","โหมดกล้อง",["follow","free"],["ติดตาม","อิสระ (ลากสองนิ้วเลื่อนกล้อง)"]],["inv","กลับด้านกล้อง",[false,true],["ปิด","เปิด"]],["names","ชื่อผู้ใช้เหนือหัว",[true,false],["แสดง","ซ่อน"]],["chat","แสดงแชต",[true,false],["เปิด","ปิด"]],["stats","สถิติประสิทธิภาพ",[false,true],["ปิด","เปิด"]],["hap","การสั่นเมื่อกระโดด",[false,true],["ปิด","เปิด"]]];
+var BARS=[["sens","ความไวกล้อง"],["gq","คุณภาพกราฟิก"]];
+function saveSet(){W("robx_set",SET)}
+function applyGfx(){R.setPixelRatio(Math.min(devicePixelRatio,.5+SET.gq*.15));rs();var sh=SET.gq>=4;sun.castShadow=sh;R.shadowMap.enabled=sh;S.traverse(function(o){if(o.material)o.material.needsUpdate=true})}
+function panCam(dx,dy){var k=dist*.0025,T=scr=="play"?(SET.cam=="free"?camOff:null):tgt;if(!T)return;T.x-=Math.cos(yaw)*dx*k;T.z+=Math.sin(yaw)*dx*k;T.y=Math.max(T===tgt?0:-10,T.y+dy*k);if(T===camOff)T.clampLength(0,30)}
+var ptrs={};
+cv.addEventListener("pointerdown",function(e){ptrs[e.pointerId]={x:e.clientX,y:e.clientY};moved=Object.keys(ptrs).length==1?0:99;cv.setPointerCapture(e.pointerId)});
+cv.addEventListener("pointermove",function(e){var p=ptrs[e.pointerId];if(!p)return;var ks=Object.keys(ptrs);
+ if(ks.length>=2){var a=ptrs[ks[0]],b=ptrs[ks[1]],od=Math.hypot(a.x-b.x,a.y-b.y),oc=[(a.x+b.x)/2,(a.y+b.y)/2];p.x=e.clientX;p.y=e.clientY;zoom((od-Math.hypot(a.x-b.x,a.y-b.y))*.06);panCam((a.x+b.x)/2-oc[0],(a.y+b.y)/2-oc[1])}
+ else{var dx=e.clientX-p.x,dy=e.clientY-p.y;moved+=Math.abs(dx)+Math.abs(dy);yaw-=dx*.006*SET.sens/5;pitch=Math.max(-.2,Math.min(1.4,pitch+dy*.005*SET.sens/5*(SET.inv?-1:1)));p.x=e.clientX;p.y=e.clientY}});
+function pup(e){var was=Object.keys(ptrs).length;delete ptrs[e.pointerId];if(was==1&&moved<6&&e.type=="pointerup"){if(scr=="edit")pick(e);if(scr=="play")playClick(e)}}
+cv.addEventListener("pointerup",pup);cv.addEventListener("pointercancel",pup);
+function grab(){try{var c=document.createElement("canvas");c.width=320;c.height=180;var w=cv.width,h=cv.height,sw=w,sh=w*9/16;if(sh>h){sh=h;sw=h*16/9}c.getContext("2d").drawImage(cv,(w-sw)/2,(h-sh)/2,sw,sh,0,0,320,180);SHOTS.unshift(c.toDataURL("image/jpeg",.6));SHOTS=SHOTS.slice(0,8);W("robx_shots",SHOTS)}catch(e){toast("ถ่ายภาพไม่สำเร็จ")}}
+function statTick(dt){A.sp.visible=SET.names;for(var k in rem)rem[k].a.sp.visible=SET.names;sfc++;sft+=dt;var s=$("stt");
+ if(sft>=.5){var f=Math.round(sfc/sft);sfc=0;sft=0;if(SET.stats&&scr=="play"){s.hidden=false;s.textContent="FPS "+f+" • วัตถุ "+world.children.length+" • ผู้เล่น "+(1+Object.keys(rem).length)+" • คำสั่งวาด "+R.info.render.calls}else s.hidden=true}}
+function peers(){var l=[{k:"me",n:U().name,u:uid||"",c:U().gender=="f"?"#ff6fae":"#3d7bff"}];for(var k in rem){var q=rem[k].t||{},sh=ITEM[q.e&&q.e.shirt];l.push({k:k,n:String(q.n||"ผู้เล่น").slice(0,16),u:String(q.u||"").slice(0,64),c:sh&&sh.s=="shirt"?sh.c:(q.g=="f"?"#ff6fae":"#3d7bff")})}return l}
+function pmOpen(t){pmT=t||pmT;$("pm").hidden=false;$("qm").hidden=true;pmRender()}
+function pmRender(){var TB=[["u","ผู้ใช้"],["s","การตั้งค่า"],["g","แกลเลอรี"],["r","รายงาน"],["h","ความช่วยเหลือ"]],h='<div class="pmt">'+TB.map(function(x){return'<button data-pt="'+x[0]+'" class="'+(pmT==x[0]?"on":"")+'">'+x[1]+'</button>'}).join("")+'</div><div class="pmc">';
+ if(pmT=="u"){h+='<div class="pb3"><button data-pa="exit">ออก</button><button data-pa="resp">เกิดใหม่</button><button data-pa="go" class="pri">เล่นต่อ</button></div><div class="pb3" style="grid-template-columns:1fr 1fr"><button data-pa="inv">เชิญเพื่อน</button><button data-pa="muteall">'+(muteAll?"แสดงแชตผู้เล่นอื่น":"ซ่อนแชตผู้เล่นอื่นทั้งหมด")+'</button></div><div style="display:flex;justify-content:space-between;align-items:center"><h3>ในเซิร์ฟเวอร์นี้</h3><span><button data-pa="grid" class="'+(pmGrid?"on":"")+'">▦</button> <button data-pa="list" class="'+(pmGrid?"":"on")+'">☰</button></span></div><div class="'+(pmGrid?"pgrid":"plist")+'">'+
+  peers().map(function(p){return'<div class="pt"><div class="pa" style="background:'+p.c+'">'+esc((p.n[0]||"?").toUpperCase())+'</div><b>'+esc(p.n)+(p.k=="me"?" (คุณ)":"")+'</b>'+(p.k!="me"?'<button data-pk="'+esc(p.k)+'" aria-label="ตัวเลือก">⋯</button>':'')+(pmSel==p.k?'<div class="pact"><button data-pa="fr" data-k="'+esc(p.k)+'">เพิ่มเพื่อน</button><button data-pa="mute" data-k="'+esc(p.k)+'">'+(muted[p.u]?"เลิกซ่อนแชต":"ซ่อนแชต")+'</button><button data-pa="rep" data-k="'+esc(p.k)+'">รายงาน</button></div>':'')+'</div>'}).join("")+'</div>'}
+ else if(pmT=="s"){h+=OPTS.map(function(o){var i=o[2].indexOf(SET[o[0]]);return'<div class="srow"><span>'+o[1]+'</span><div class="ctl"><button data-sd="'+o[0]+'" data-d="-1" aria-label="ก่อนหน้า">‹</button><span>'+o[3][i<0?0:i]+'</span><button data-sd="'+o[0]+'" data-d="1" aria-label="ถัดไป">›</button></div></div>'}).join("")+
+  BARS.map(function(b){var cells="";for(var i=1;i<=10;i++)cells+='<i class="'+(i<=SET[b[0]]?"f":"")+'"></i>';return'<div class="srow"><span>'+b[1]+'</span><div class="ctl"><button data-sd="'+b[0]+'" data-d="-1" aria-label="ลด">⊖</button><div class="bars">'+cells+'</div><button data-sd="'+b[0]+'" data-d="1" aria-label="เพิ่ม">⊕</button></div></div>'}).join("")+'<p class="mu" style="color:#9aa3ba;font-size:12px">การตั้งค่าบันทึกในเครื่องนี้</p>'}
+ else if(pmT=="g"){var big=SHOTS[pmView];h+=(big&&/^data:image\/jpeg;base64,/.test(big)?'<img src="'+big+'" data-sv="-1" style="width:100%;border-radius:10px;margin-bottom:8px" alt="ภาพที่ถ่าย">':'')+'<button data-pa="shot" class="pri" style="width:100%">ถ่ายภาพหน้าจอ</button>'+(SHOTS.length?'<div class="pgrid" style="margin-top:12px">'+SHOTS.filter(function(s){return/^data:image\/jpeg;base64,/.test(s)}).map(function(s,i){return'<div class="pt"><img src="'+s+'" data-sv="'+i+'" style="width:100%;border-radius:8px" alt="ภาพ"><button data-pa="delshot" data-k="'+i+'">ลบ</button></div>'}).join("")+'</div>':'<p style="color:#9aa3ba">ยังไม่มีภาพ</p>')}
+ else if(pmT=="r"){var ps=peers().filter(function(p){return p.k!="me"});h+='<h3>ส่งรายงาน</h3><div class="srow"><span>รายงาน</span><select id="rt"><option value="p">ผู้เล่น</option><option value="g">เกมนี้</option></select></div><div class="srow"><span>ผู้เล่น</span><select id="rp">'+(ps.length?ps.map(function(p){return'<option value="'+esc(p.k)+'"'+(pmSel==p.k?" selected":"")+'>'+esc(p.n)+'</option>'}).join(""):'<option value="">(ไม่มีผู้เล่นอื่น)</option>')+'</select></div><div class="srow"><span>เหตุผล</span><select id="rr"><option>คำหยาบคาย/คุกคาม</option><option>สแปม</option><option>โกง/ใช้โปรแกรมช่วย</option><option>เนื้อหาไม่เหมาะสม</option><option>อื่นๆ</option></select></div><textarea id="rd" maxlength="300" rows="3" placeholder="รายละเอียดเพิ่มเติม" style="width:100%;box-sizing:border-box;background:#222;color:#fff;border:1px solid #555;border-radius:8px;padding:8px;margin:8px 0"></textarea><button data-pa="sendrep" class="pri" style="width:100%">ส่งรายงาน</button><p style="color:#9aa3ba;font-size:12px">รายงานถูกเก็บไว้ให้เจ้าของแพลตฟอร์มตรวจสอบ ยังไม่มีหน้าแอดมินและการลงโทษอัตโนมัติ</p>'}
+ else h+='<div class="hg">'+[["ซูมเข้า/ออก","จีบหรือถ่างสองนิ้ว (คอม: เลื่อนล้อเมาส์)"],["หมุนกล้อง","ลากนิ้วบนหน้าจอ (คอม: ลากเมาส์)"],["เคลื่อนที่","จอยสติ๊กซ้าย (คอม: WASD / ลูกศร)"],["กระโดด","ปุ่มกระโดดขวาล่าง (คอม: Space)"],["เลื่อนกล้องอิสระ","ลากสองนิ้ว เมื่อเปิดโหมดกล้องอิสระ"],["ใช้งานวัตถุ","แตะวัตถุที่สคริปต์ผูกไว้"],["ท่าทาง","ปุ่ม ☰ > ท่าทาง (คอม: E)"],["แชต","ปุ่ม 💬 พิมพ์คุยกับคนในห้อง"]].map(function(x){return'<div class="hc"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>'}).join("")+'</div><p style="color:#9aa3ba;font-size:12px;margin-top:12px">ROBX Client 0.9 • ห้อง: '+esc(cur.r||"เล่นคนเดียว")+' • เกม: '+esc(cur.g||"-")+'</p>';
+ $("pm").innerHTML='<div class="pmp">'+h+'</div></div>'}
+$("pm").addEventListener("click",function(e){if(e.target==$("pm")){$("pm").hidden=true;return}var b=e.target.closest("[data-pt],[data-pa],[data-pk],[data-sd],[data-sv]");if(!b)return;var d=b.dataset;
+ if(d.pt){pmT=d.pt;pmView=-1;pmRender()}
+ else if(d.pk){pmSel=pmSel==d.pk?null:d.pk;pmRender()}
+ else if(d.sv){pmView=pmView==+d.sv?-1:+d.sv;pmRender()}
+ else if(d.sd){var o=OPTS.filter(function(x){return x[0]==d.sd})[0],k=d.sd,dd=+d.d;
+  if(o){var i=(o[2].indexOf(SET[k])+dd+o[2].length)%o[2].length;SET[k]=o[2][i]}else SET[k]=Math.max(1,Math.min(10,SET[k]+dd));
+  if(k=="gq")applyGfx();if(k=="cam"&&SET.cam=="follow")camOff.set(0,0,0);if(k=="chat")$("chat").hidden=!(SET.chat&&net);saveSet();pmRender()}
+ else if(d.pa){var a=d.pa,pk=d.k,P=peers().filter(function(p){return p.k==pk})[0];
+  if(a=="exit"){$("pm").hidden=true;$("ex").onclick()}
+  else if(a=="resp"){playerP.respawn();$("pm").hidden=true}
+  else if(a=="go")$("pm").hidden=true;
+  else if(a=="inv"){var t="มาเล่นกับฉันบน ROBX ห้อง: "+(cur.r||"-");if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){toast("คัดลอกคำเชิญแล้ว")},function(){toast(t)});else toast(t)}
+  else if(a=="muteall"){muteAll=!muteAll;pmRender()}
+  else if(a=="grid"||a=="list"){pmGrid=a=="grid";pmRender()}
+  else if(a=="fr"){if(!(DB&&uid)||!P||!P.u)return toast("เพิ่มเพื่อนไม่ได้ (ต้องออนไลน์)");if(!PL.some(function(x){return x.id==P.u}))return toast("ไม่พบผู้เล่นนี้ในระบบ");var t2=to(uid).slice();if(t2.indexOf(P.u)<0)t2.push(P.u);saveReq(t2,no().slice());toast("ส่งคำขอเป็นเพื่อนถึง "+P.n)}
+  else if(a=="mute"){if(!P||!P.u)return toast("ซ่อนแชตผู้ใช้นี้ไม่ได้");muted[P.u]=!muted[P.u];pmRender()}
+  else if(a=="rep"){pmT="r";pmSel=pk;pmRender()}
+  else if(a=="shot"){$("pm").hidden=true;shotReq=true;toast("บันทึกภาพไว้ในแกลเลอรี")}
+  else if(a=="delshot"){SHOTS.splice(+pk,1);W("robx_shots",SHOTS);pmView=-1;pmRender()}
+  else if(a=="sendrep"){if(!(DB&&uid))return toast("ส่งรายงานได้เมื่อออนไลน์");var ty=$("rt").value,pr=peers().filter(function(p){return p.k==$("rp").value})[0];if(ty=="p"&&!pr)return toast("เลือกผู้เล่นที่ต้องการรายงาน");
+   var it={t:ty,target:ty=="p"?pr.n:"",tu:ty=="p"?pr.u:"",reason:$("rr").value,detail:$("rd").value.slice(0,300),game:cur.g||"",time:Date.now()};
+   DB.doc("rep/"+uid).get().then(function(sn){var l=sn.exists?(sn.data().items||[]):[];l.push(it);return DB.doc("rep/"+uid).set({items:l.slice(-20)})}).then(function(){toast("ส่งรายงานแล้ว ขอบคุณ");$("pm").hidden=true}).catch(function(){toast("ส่งรายงานไม่ได้ ต้องมีสิทธิ์ Contributor ขึ้นไป")})}}});
+$("lg").onclick=function(){pmOpen("u")};
+$("hb").onclick=function(){$("qm").hidden=!$("qm").hidden};
+$("qm").addEventListener("click",function(e){var b=e.target.closest("[data-q]");if(!b)return;$("qm").hidden=true;var q=b.dataset.q;if(q=="emote")doEmote();else if(q=="shot"){shotReq=true;toast("บันทึกภาพไว้ในแกลเลอรี")}else pmOpen("s")});
+$("ch").onclick=function(){if(!net)return toast("แชตใช้ได้เมื่อเล่นในห้องออนไลน์");SET.chat=!SET.chat;saveSet();$("chat").hidden=!SET.chat;if(SET.chat){unread=0;$("ch").textContent="💬"}};
+$("mc").onclick=function(){toast("แชทด้วยเสียงยังไม่รองรับ ใช้แชตข้อความแทน")};
+applyGfx();
+
+/* ---------- rig R6/R15 + jump pose ---------- */
+var jst=0,swv=0;
+function lerpR(o,k,v,f){o[k]+=(v-o[k])*f}
+function poseA(a,sw,st,dt){var p=a.pt,f=Math.min(1,(dt||.016)*14),ax=sw,bx=-sw,lx=-sw,rx=sw,az=0,sp=0,kn=Math.abs(sw)*.5,el=-Math.abs(sw)*.4;
+ if(st==1){ax=bx=0;lx=rx=0;az=2.8;sp=.05;kn=.25;el=-.15}
+ else if(st==2){ax=bx=0;lx=-.1;rx=.1;az=1.35;sp=.2;kn=.1;el=0}
+ lerpR(p.aLG.rotation,"x",ax,f);lerpR(p.aRG.rotation,"x",bx,f);lerpR(p.aLG.rotation,"z",-az,f);lerpR(p.aRG.rotation,"z",az,f);
+ lerpR(p.lLG.rotation,"x",lx,f);lerpR(p.lRG.rotation,"x",rx,f);lerpR(p.lLG.rotation,"z",-sp,f);lerpR(p.lRG.rotation,"z",sp,f);
+ if(a.r15){lerpR(p.lL2G.rotation,"x",kn,f);lerpR(p.lR2G.rotation,"x",kn,f);lerpR(p.aL2G.rotation,"x",el,f);lerpR(p.aR2G.rotation,"x",el,f)}}
+function setRig(r15){var pos=av.position.clone(),rot=av.rotation.y,vis=av.visible;S.remove(av);A=mkAv(r15);av=A.g;pt=A.pt;S.add(av);av.position.copy(pos);av.rotation.y=rot;av.visible=vis;dress()}
+function applyRig(){var w=wal.rig=="r15";if(!!A.r15!==w)setRig(w)}
+$("asheet").addEventListener("click",function(e){var b=e.target.closest("[data-rig]");if(!b)return;wal.rig=b.dataset.rig;saveWal();applyRig();pev=Object.assign({},wal.eq);prev();aRender()});
+
+
+async function bootNet(){var N=window.ROBX_NET;DB=N.api.db;RM=N.api.room;USR=N.api.user;
+ $("go").onclick=async function(){var n=$("un").value.trim(),p=$("pw").value;err("");
+  if(n.length<3||n.length>16)return err("ชื่อผู้ใช้ต้องยาว 3–16 ตัวอักษร");if(p.length<6)return err("รหัสผ่านต้องมีอย่างน้อย 6 ตัว");
+  var g=document.querySelector("input[name=g]:checked");if(amode=="reg"&&!g)return err("กรุณาเลือกเพศ");
+  $("go").disabled=true;try{finishLogin(await N.auth(amode=="reg"?"reg":"login",n,p,g?g.value:""))}catch(e){err(e.message||"เชื่อมต่อเซิร์ฟเวอร์ไม่ได้")}$("go").disabled=false};
+ setM("login");$("onl").textContent=N.url?"เซิร์ฟเวอร์: "+N.url:"ยังไม่ได้ตั้งค่า ROBX_SERVER_URL";
+ if(!N.url)return err("ยังไม่ได้ตั้งค่า URL เซิร์ฟเวอร์");
+ err("กำลังเชื่อมต่อ…");var r=await N.resume();err("");if(r)finishLogin(r)}
+function finishLogin(r){uid=r.uid;prof={name:r.name,gender:r.gender,joined:r.joined};adm=!!r.admin;me=uid;
+ DB.collection("pub").onSnapshot(function(q2){pubs=q2.docs.map(function(d){var x=d.data();x.id=d.id;return x});if(me&&tab=="h"&&!$("app").hidden)render()},function(){pubs=null});subs();enter(uid)}
+
+(window.ROBX_NET?bootNet:boot)();
+})();
+</script></body></html>
